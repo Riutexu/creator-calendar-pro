@@ -1,0 +1,285 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { DEFAULT_CONFIG } from '@/types';
+import ActiveDaysToggle from '@/components/Settings/ActiveDaysToggle.astro';
+import StreamingWindow from '@/components/Settings/StreamingWindow.astro';
+import ApiKeyInput from '@/components/Settings/ApiKeyInput.astro';
+import ShareModal from '@/components/Modals/ShareModal.astro';
+
+const config = DEFAULT_CONFIG;
+---
+
+<BaseLayout
+  title="Configuración — Creator Calendar Pro"
+  description="Configura tus días de stream, ventana horaria, API Key de SteamGridDB y exporta/importa tu calendario."
+  noIndex={true}
+>
+  <header class="sticky top-0 z-sticky bg-oled-black/95 backdrop-blur-sm border-b border-oled-neutral px-4 py-3 flex items-center justify-between gap-4">
+    <a href="/" class="btn-ghost p-2 rounded-full" aria-label="Volver al calendario">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12" /><polyline points="12 19 5 12 12 5" /></svg>
+    </a>
+    <h1 class="font-display text-xl font-bold text-white flex-1 text-center">⚙️ Configuración</h1>
+    <div class="w-10" />
+  </header>
+
+  <main class="p-4 max-w-2xl mx-auto space-y-6 pb-20" role="main">
+    <form id="settings-form" class="space-y-6">
+      <ActiveDaysToggle activeDays={config.activeDays} onToggleDay={(day) => window.toggleActiveDay?.(day)} />
+
+      <StreamingWindow streamingWindow={config.streamingWindow} onChange={(w) => window.updateStreamingWindow?.(w)} />
+
+      <ApiKeyInput
+        apiKey={config.steamGridDbKey}
+        onSave={(key) => window.saveApiKey?.(key)}
+        onTest={() => window.testApiKey?.()}
+      />
+
+      <fieldset class="space-y-4 border-t border-oled-neutral pt-6">
+        <legend class="label">Cuenta y Perfil</legend>
+        <div>
+          <label class="label" for="username">Nombre de usuario</label>
+          <input
+            type="text"
+            id="username"
+            class="input"
+            placeholder="tuusuario (para links compartidos)"
+            value={config.username || ''}
+            maxlength="30"
+            pattern="[a-zA-Z0-9_-]+"
+          />
+          <p class="text-xs text-text-muted mt-1">Se usa en links compartidos: creator-calendar.pro/@tuusuario</p>
+        </div>
+        <div>
+          <label class="label" for="timezone">Zona horaria</label>
+          <select id="timezone" class="input">
+            <option value="Europe/Madrid" selected={config.timezone === 'Europe/Madrid'}>Europe/Madrid (UTC+1/+2)</option>
+            <option value="Europe/Paris" selected={config.timezone === 'Europe/Paris'}>Europe/Paris (UTC+1/+2)</option>
+            <option value="Europe/Berlin" selected={config.timezone === 'Europe/Berlin'}>Europe/Berlin (UTC+1/+2)</option>
+            <option value="America/Mexico_City" selected={config.timezone === 'America/Mexico_City'}>America/Mexico_City (UTC-6/-5)</option>
+            <option value="America/Bogota" selected={config.timezone === 'America/Bogota'}>America/Bogota (UTC-5)</option>
+            <option value="America/Argentina/Buenos_Aires" selected={config.timezone === 'America/Argentina/Buenos_Aires'}>America/Argentina/Buenos_Aires (UTC-3)</option>
+            <option value="UTC" selected={config.timezone === 'UTC'}>UTC</option>
+          </select>
+        </div>
+      </fieldset>
+
+      <fieldset class="space-y-4 border-t border-oled-neutral pt-6">
+        <legend class="label">Exportar e Importar</legend>
+        <div class="grid grid-cols-2 gap-3">
+          <button type="button" class="btn-secondary" onclick={() => window.exportJSON?.()}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mr-2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /><line x1="10" y1="9" x2="8" y2="9" /></svg>
+            Exportar JSON
+          </button>
+          <button type="button" class="btn-secondary" onclick={() => window.downloadICS?.()}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mr-2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /><line x1="10" y1="9" x2="8" y2="9" /></svg>
+            Descargar .ics
+          </button>
+          <button type="button" class="btn-secondary" onclick={() => window.generateShareLink?.()}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mr-2"><circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" /><line x1="8.59" y1="13.51" x2="15.42" y2="17.49" /><line x1="15.41" y1="6.51" x2="8.58" y2="10.49" /></svg>
+            Generar Link
+          </button>
+          <button type="button" class="btn-secondary" onclick={() => window.exportImage?.()}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mr-2"><rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><polyline points="21 15 16 10 5 21" /></svg>
+            Exportar PNG
+          </button>
+        </div>
+        <div>
+          <label class="label" for="import-file">Importar JSON</label>
+          <input
+            type="file"
+            id="import-file"
+            class="input file:mr-4 file:py-2 file:px-4 file:rounded-card-sm file:border-0 file:text-sm file:font-mono file:bg-oled-light file:text-oled-black hover:file:bg-opacity-90"
+            accept=".json"
+            onchange={(e) => window.importJSON?.(e.target.files?.[0])}
+          />
+        </div>
+      </fieldset>
+
+      <fieldset class="space-y-4 border-t border-oled-neutral pt-6">
+        <legend class="label">Datos y Privacidad</legend>
+        <div class="p-3 bg-oled-neutral/30 border border-oled-neutral rounded-card-sm text-sm text-text-secondary space-y-2">
+          <p><strong>100% Local & Privado:</strong> Todos tus datos (eventos, configuración, API Key) se guardan en <code class="font-mono bg-oled-black px-1 rounded">IndexedDB</code> de tu navegador. Nada se envía a servidores externos.</p>
+          <p><strong>SteamGridDB:</strong> Solo se conecta a <code class="font-mono bg-oled-black px-1 rounded">api.steamgriddb.com</code> para buscar portadas. Tu API Key nunca sale de tu dispositivo.</p>
+          <p><strong>Sin tracking:</strong> Sin Google Analytics, sin cookies de terceros, sin fingerprinting. Solo tú tienes acceso a tus datos.</p>
+          <p><strong>Backup automático:</strong> Exporta JSON periódicamente para tener copia de seguridad.</p>
+        </div>
+        <div class="flex gap-2">
+          <button type="button" class="btn-danger flex-1" onclick={() => window.clearAllData?.()}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mr-2"><polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /></svg>
+            Borrar Todo
+          </button>
+        </div>
+      </fieldset>
+    </form>
+  </main>
+
+  <ShareModal
+    id="settings-share-modal"
+    isOpen={false}
+    shareUrl=""
+    qrCodeDataUrl=""
+    username={config.username}
+    onClose={() => window.closeShareModal?.()}
+    onCopyLink={() => window.copyShareLink?.()}
+    onDownloadICS={() => window.downloadICS?.()}
+    onExportImage={() => window.exportImage?.()}
+    onExportJSON={() => window.exportJSON?.()}
+  />
+</BaseLayout>
+
+<script is:inline>
+  const config = { ...{activeDays: [1,2,5,0], streamingWindow: {start: '18:00', end: '02:00'}, timezone: 'Europe/Madrid', username: '', steamGridDbKey: ''} };
+
+  window.toggleActiveDay = async (day: number) => {
+    const { getConfig, saveConfig } = await import('/src/lib/idb.ts');
+    const cfg = await getConfig() || config;
+    const newActiveDays = cfg.activeDays.includes(day)
+      ? cfg.activeDays.filter(d => d !== day)
+      : [...cfg.activeDays, day].sort((a, b) => a - b);
+
+    await saveConfig({ ...cfg, activeDays: newActiveDays });
+    window.toastSuccess?.(newActiveDays.includes(day) ? 'Día activado' : 'Día desactivado');
+    updateActiveDaysUI(newActiveDays);
+  };
+
+  window.updateStreamingWindow = async (window_: { start: string; end: string }) => {
+    const { getConfig, saveConfig } = await import('/src/lib/idb.ts');
+    const { validateConfig } = await import('/src/lib/calendar.ts');
+    const cfg = await getConfig() || config;
+
+    const validation = validateConfig({ streamingWindow: window_ });
+    if (!validation.valid) {
+      window.toastError?.(validation.errors[0]);
+      return;
+    }
+
+    await saveConfig({ ...cfg, streamingWindow: window_ });
+    window.toastSuccess?.('Horario actualizado');
+  };
+
+  window.saveApiKey = async (key: string) => {
+    const { getConfig, saveConfig } = await import('/src/lib/idb.ts');
+    const cfg = await getConfig() || config;
+    await saveConfig({ ...cfg, steamGridDbKey: key.trim() });
+    window.toastSuccess?.('API Key guardada');
+  };
+
+  window.testApiKey = async () => {
+    const input = document.getElementById('api-key') as HTMLInputElement;
+    const statusEl = document.getElementById('api-key-status');
+    const testBtn = document.querySelector('button[onclick="window.testApiKey?.()"]') as HTMLButtonElement;
+
+    const key = input.value.trim();
+    if (!key) {
+      window.toastError?.('Ingresa una API Key primero');
+      return;
+    }
+
+    testBtn.disabled = true;
+    testBtn.innerHTML = '<svg class="animate-spin-slow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" stroke-opacity="0.25" /><path d="M12 2a10 10 0 0 1 10 10" stroke-opacity="1" stroke-linecap="round" /></svg> Probando...';
+
+    try {
+      const { createSteamGridDBClient } = await import('/src/lib/steamgriddb.ts');
+      const client = createSteamGridDBClient(key);
+      const result = await client.testConnection();
+
+      if (result.valid) {
+        statusEl.textContent = '✅ ' + result.message;
+        statusEl.className = 'text-xs text-emerald-400 min-h-[20px]';
+        window.toastSuccess?.('Conexión exitosa');
+      } else {
+        statusEl.textContent = '❌ ' + result.message;
+        statusEl.className = 'text-xs text-rose-400 min-h-[20px]';
+        window.toastError?.(result.message);
+      }
+    } catch (error) {
+      statusEl.textContent = '❌ Error de conexión';
+      statusEl.className = 'text-xs text-rose-400 min-h-[20px]';
+      window.toastError?.('Error al probar la conexión');
+    } finally {
+      testBtn.disabled = false;
+      testBtn.textContent = 'Probar Conexión';
+    }
+  };
+
+  window.exportJSON = async () => {
+    const { getConfig, getAllEvents } = await import('/src/lib/idb.ts');
+    const { exportToJSON } = await import('/src/lib/share.ts');
+    const cfg = await getConfig();
+    const events = await getAllEvents();
+    exportToJSON(cfg!, events, cfg?.username);
+    window.toastSuccess?.('JSON exportado');
+  };
+
+  window.downloadICS = async () => {
+    const { getConfig, getAllEvents } = await import('/src/lib/idb.ts');
+    const { downloadICS } = await import('/src/lib/share.ts');
+    const cfg = await getConfig();
+    const events = await getAllEvents();
+    await downloadICS(events, cfg!, cfg?.username);
+    window.toastSuccess?.('Archivo .ics descargado');
+  };
+
+  window.generateShareLink = async () => {
+    const { getConfig, getAllEvents } = await import('/src/lib/idb.ts');
+    const { generateShareLink } = await import('/src/lib/share.ts');
+    const cfg = await getConfig();
+    const events = await getAllEvents();
+    const { url, qrCodeDataUrl } = await generateShareLink(cfg!, events, cfg?.username);
+
+    const modal = document.getElementById('settings-share-modal');
+    if (modal) {
+      (modal as any)._show?.(url, qrCodeDataUrl, cfg?.username);
+    }
+  };
+
+  window.exportImage = () => {
+    document.getElementById('export-image-btn')?.click();
+  };
+
+  window.importJSON = async (file: File | undefined) => {
+    if (!file) return;
+    const { importFromJSON } = await import('/src/lib/share.ts');
+    const { saveEvent, saveConfig } = await import('/src/lib/idb.ts');
+
+    try {
+      const { config: importedConfig, events: importedEvents } = await importFromJSON(file);
+
+      await saveConfig(importedConfig);
+      for (const event of importedEvents) {
+        await saveEvent(event);
+      }
+
+      window.toastSuccess?.(`${importedEvents.length} eventos importados`);
+      setTimeout(() => location.reload(), 1000);
+    } catch {
+      window.toastError?.('Error al importar el archivo');
+    }
+  };
+
+  window.clearAllData = async () => {
+    if (!confirm('⚠️ Esto borrará TODOS tus eventos y configuración. ¿Estás seguro?')) return;
+    if (!confirm('Última confirmación: ¿Borrar todo irrevocablemente?')) return;
+
+    const { getDB } = await import('/src/lib/idb.ts');
+    const db = await getDB();
+    await db.clear('events');
+    await db.clear('config');
+    await db.clear('shares');
+    await db.clear('cache');
+
+    window.toastSuccess?.('Todos los datos borrados');
+    setTimeout(() => location.reload(), 1000);
+  };
+
+  function updateActiveDaysUI(activeDays: number[]) {
+    document.querySelectorAll('[data-day]').forEach(btn => {
+      const day = parseInt(btn.getAttribute('data-day')!);
+      const isActive = activeDays.includes(day);
+      btn.classList.toggle('pill-active-day', isActive);
+      btn.classList.toggle('pill-inactive-day', !isActive);
+      btn.setAttribute('aria-pressed', String(isActive));
+      btn.querySelector('span:last-child')!.className = `w-2 h-2 rounded-full ${isActive ? 'bg-oled-light' : 'bg-oled-neutral'}`;
+    });
+  }
+</script>

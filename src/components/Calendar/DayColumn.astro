@@ -1,0 +1,80 @@
+---
+interface Props {
+  day: number;
+  dayName: string;
+  isActive: boolean;
+  timeSlots: string[];
+  events: Map<string, any[]>;
+  date: Date;
+  isSharedView?: boolean;
+  onCreateEvent?: (day: number, time: string) => void;
+  class?: string;
+}
+const { day, dayName, isActive, timeSlots, events, date, isSharedView = false, onCreateEvent, class: className = '' } = Astro.props;
+
+const dateStr = date.toISOString().split('T')[0];
+---
+<div
+  class={`flex-1 min-w-0 relative ${className}`}
+  data-day={day}
+  data-date={dateStr}
+  data-active={isActive}
+  role="gridcell"
+  aria-label={dayName}
+>
+  <div
+    class={`sticky top-0 z-10 px-2 py-2 text-center font-mono text-pill font-medium border-b border-oled-neutral ${
+      isActive
+        ? 'bg-oled-dark text-white'
+        : 'bg-oled-inactive text-text-muted'
+    }`}
+  >
+    <span class="flex items-center justify-center gap-1.5">
+      {dayName}
+      <span class="text-xs font-sans">{date.getDate()}</span>
+      {!isActive && (
+        <span class="badge badge-warning ml-1" aria-label="Día inactivo">⚠ INACTIVO</span>
+      )}
+    </span>
+  </div>
+
+  <div class="flex flex-col min-h-[calc(100vh-120px)]" role="list" aria-label={`Eventos de ${dayName}`}>
+    {timeSlots.map((slot, index) => {
+      const key = `${dateStr}-${slot}`;
+      const dayEvents = events.get(key) || [];
+      const isLast = index === timeSlots.length - 1;
+
+      return (
+        <div
+          class="relative min-h-[60px] border-b border-oled-neutral/30"
+          data-time={slot}
+          data-slot-key={key}
+        >
+          {dayEvents.map((event, eventIndex) => (
+            <EventPill
+              event={event}
+              key={`${event.id}-${eventIndex}`}
+              isSharedView={isSharedView}
+            />
+          ))}
+
+          {isActive && !isSharedView && dayEvents.length === 0 && (
+            <button
+              type="button"
+              class="absolute inset-0 w-full h-full flex items-center justify-center text-text-muted/30 hover:text-oled-light/50 hover:bg-oled-neutral/20 transition-all duration-fast rounded-card-sm mx-1 my-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oled-light"
+              onclick={() => onCreateEvent?.(day, slot)}
+              aria-label={`Crear evento en ${dayName} a las ${slot}`}
+              data-create-slot={slot}
+            >
+              <span class="text-xs font-mono">+</span>
+            </button>
+          )}
+
+          {!isLast && (
+            <div class="absolute bottom-0 left-2 right-2 border-t border-oled-neutral/20" aria-hidden="true" />
+          )}
+        </div>
+      )
+    })}
+  </div>
+</div>

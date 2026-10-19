@@ -1,0 +1,9 @@
+---
+interface Props {
+  class?: string;
+  children: any;
+}
+---
+<div class={`relative ${class || ''}`}>
+  <slot name="children" />
+</div>

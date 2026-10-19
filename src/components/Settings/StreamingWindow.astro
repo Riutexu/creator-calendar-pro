@@ -1,0 +1,62 @@
+---
+interface Props {
+  streamingWindow: { start: string; end: string };
+  onChange: (window: { start: string; end: string }) => void;
+  class?: string;
+}
+const { streamingWindow, onChange, class: className = '' } = Astro.props;
+
+const presets = [
+  { label: 'Tarde/Noche (18:00-02:00)', start: '18:00', end: '02:00' },
+  { label: 'Noche (20:00-04:00)', start: '20:00', end: '04:00' },
+  { label: 'Mañana/Tarde (10:00-18:00)', start: '10:00', end: '18:00' },
+  { label: '24h (00:00-23:59)', start: '00:00', end: '23:59' },
+];
+---
+<fieldset class={`space-y-4 ${className}`}>
+  <legend class="label">Ventana de Streaming</legend>
+  <p class="text-xs text-text-muted">Horas visibles en el calendario. Los eventos fuera de este rango no se mostrarán.</p>
+
+  <div class="grid grid-cols-2 gap-3">
+    <div>
+      <label class="label" for="window-start">Inicio</label>
+      <input
+        type="time"
+        id="window-start"
+        class="input"
+        value={streamingWindow.start}
+        onchange={(e) => onChange({ ...streamingWindow, start: (e.target as HTMLInputElement).value })}
+      />
+    </div>
+    <div>
+      <label class="label" for="window-end">Fin</label>
+      <input
+        type="time"
+        id="window-end"
+        class="input"
+        value={streamingWindow.end}
+        onchange={(e) => onChange({ ...streamingWindow, end: (e.target as HTMLInputElement).value })}
+      />
+    </div>
+  </div>
+
+  <div class="flex flex-wrap gap-2" role="group" aria-label="Presets de horario">
+    {presets.map(preset => {
+      const isActive = streamingWindow.start === preset.start && streamingWindow.end === preset.end;
+      return (
+        <button
+          type="button"
+          class={`pill pill-tag transition-all ${isActive ? 'pill-active-day' : ''}`}
+          onclick={() => onChange({ start: preset.start, end: preset.end })}
+          aria-pressed={isActive}
+        >
+          {preset.label}
+        </button>
+      )
+    })}
+  </div>
+
+  <div class="p-3 bg-oled-neutral/30 border border-oled-neutral rounded-card-sm text-xs text-text-muted">
+    <strong class="text-white">Nota:</strong> Si la hora de fin es anterior a la de inicio, se entiende que cruza medianoche (ej. 22:00 - 02:00).
+  </div>
+</fieldset>

@@ -1,0 +1,62 @@
+---
+interface Props {
+  class?: string;
+  username?: string;
+  targetSelector?: string;
+}
+const { class: className = '', username, targetSelector = '.calendar-main' } = Astro.props;
+---
+<button
+  type="button"
+  class={`btn-secondary ${className}`}
+  id="export-image-btn"
+  aria-label="Exportar calendario como imagen PNG"
+  title="Exportar como PNG para redes sociales"
+>
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+    <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+    <circle cx="8.5" cy="8.5" r="1.5" />
+    <polyline points="21 15 16 10 5 21" />
+  </svg>
+  <span class="hidden sm:inline">Exportar PNG</span>
+</button>
+
+<script is:inline>
+  document.getElementById('export-image-btn')?.addEventListener('click', async () => {
+    const btn = document.getElementById('export-image-btn');
+    const target = document.querySelector('${targetSelector}');
+    if (!target) return;
+
+    btn.disabled = true;
+    btn.innerHTML = `
+      <svg class="animate-spin-slow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10" stroke-opacity="0.25" />
+        <path d="M12 2a10 10 0 0 1 10 10" stroke-opacity="1" stroke-linecap="round" />
+      </svg>
+      <span>Generando...</span>
+    `;
+
+    try {
+      const { exportAndDownload } = await import('/src/lib/export-image.ts');
+      await exportAndDownload(target as HTMLElement, '${username || ''}', 'png');
+
+      if (window.toastSuccess) {
+        window.toastSuccess('Imagen exportada correctamente');
+      }
+    } catch (error) {
+      if (window.toastError) {
+        window.toastError('Error al exportar la imagen');
+      }
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = `
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+          <circle cx="8.5" cy="8.5" r="1.5" />
+          <polyline points="21 15 16 10 5 21" />
+        </svg>
+        <span class="hidden sm:inline">Exportar PNG</span>
+      `;
+    }
+  });
+</script>

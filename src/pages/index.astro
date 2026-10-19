@@ -1,0 +1,367 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { DAY_NAMES_SHORT } from '@/types';
+import ExportImageButton from '@/components/Calendar/ExportImageButton.astro';
+import EventModal from '@/components/Modals/EventModal.astro';
+import ShareModal from '@/components/Modals/ShareModal.astro';
+
+const config = {
+  activeDays: [1,2,5,0],
+  streamingWindow: {start: '18:00', end: '02:00'},
+  timezone: 'Europe/Madrid',
+  username: '',
+};
+const today = new Date();
+const dayOrder = [1, 2, 3, 4, 5, 6, 0];
+---
+
+<BaseLayout
+  title="Creator Calendar Pro — Tu calendario semanal"
+  description="Calendario semanal OLED para creadores de contenido. Organiza tus streams, videos y eventos con portadas oficiales de SteamGridDB."
+>
+  <header class="sticky top-0 z-sticky bg-oled-black/95 backdrop-blur-sm border-b border-oled-neutral px-4 py-3 flex items-center justify-between gap-4 flex-wrap" role="banner">
+    <div class="flex items-center gap-3 min-w-0">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-oled-light flex-shrink-0" aria-hidden="true">
+        <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+        <line x1="16" y1="2" x2="16" y2="6" />
+        <line x1="8" y1="2" x2="8" y2="6" />
+        <line x1="3" y1="10" x2="21" y2="10" />
+      </svg>
+      <div>
+        <h1 class="font-display text-xl font-bold text-white truncate">Creator Calendar Pro</h1>
+        <p class="text-xs text-text-muted font-mono" id="week-label">Cargando...</p>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-2 flex-wrap" role="navigation" aria-label="Navegación semanal">
+      <button id="prev-week" class="btn-secondary" aria-label="Semana anterior">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6" /></svg>
+        <span class="hidden sm:inline">Anterior</span>
+      </button>
+      <button id="today-week" class="btn-secondary" aria-label="Esta semana">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mr-1"><rect x="3" y="4" width="18" height="18" rx="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg>
+        <span class="hidden sm:inline">Hoy</span>
+      </button>
+      <button id="next-week" class="btn-secondary" aria-label="Próxima semana">
+        <span class="hidden sm:inline">Siguiente</span>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6" /></svg>
+      </button>
+    </div>
+
+    <div class="flex items-center gap-2 ml-auto" role="group" aria-label="Acciones principales">
+      <ExportImageButton username={config.username} targetSelector=".calendar-main" />
+      <button id="share-btn" class="btn-secondary" aria-label="Compartir calendario">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mr-1"><circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" /><line x1="8.59" y1="13.51" x2="15.42" y2="17.49" /><line x1="15.41" y1="6.51" x2="8.58" y2="10.49" /></svg>
+        <span class="hidden sm:inline">Compartir</span>
+      </button>
+      <a href="/settings" class="btn-secondary" aria-label="Configuración">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mr-1"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" /></svg>
+        <span class="hidden sm:inline">Ajustes</span>
+      </a>
+    </div>
+  </header>
+
+  <main class="calendar-main p-4 pb-20 min-h-[calc(100vh-80px)]" role="main">
+    <div class="grid grid-cols-calendar gap-0 overflow-hidden rounded-card border border-oled-neutral bg-oled-dark max-w-full" id="calendar-grid">
+      <!-- Time column -->
+      <div class="flex-none min-w-[72px] max-w-[96px] sticky left-0 z-sticky bg-oled-black/95 backdrop-blur-sm border-r border-oled-neutral px-2 py-2" id="time-column">
+        <div class="flex flex-col" id="time-slots"></div>
+      </div>
+
+      <!-- Day columns will be rendered by JS -->
+      <div id="day-columns"></div>
+    </div>
+  </main>
+
+  <EventModal
+    id="event-modal"
+    isOpen={false}
+    onClose={() => window.closeEventModal?.()}
+    onSave={(data) => window.saveEventFromModal?.(data)}
+    onDelete={(id) => window.deleteEventFromModal?.(id)}
+  />
+
+  <ShareModal
+    id="share-modal"
+    isOpen={false}
+    shareUrl=""
+    qrCodeDataUrl=""
+    username={config.username}
+    onClose={() => window.closeShareModal?.()}
+    onCopyLink={() => window.copyShareLink?.()}
+    onDownloadICS={() => window.downloadShareICS?.()}
+    onExportImage={() => window.exportShareImage?.()}
+    onExportJSON={() => window.exportShareJSON?.()}
+  />
+</BaseLayout>
+
+<script is:inline>
+  // Default config - will be replaced by loaded config
+  let currentConfig = { ...{activeDays: [1,2,5,0], streamingWindow: {start: '18:00', end: '02:00'}, timezone: 'Europe/Madrid', username: ''} };
+  let currentWeekStart = new Date();
+
+  async function loadWeek(weekStart: Date) {
+    currentWeekStart = weekStart;
+    try {
+      const { getConfig, getAllEvents } = await import('/src/lib/idb.ts');
+      const { getWeekRange, generateTimeSlots, getEventsForWeek, getWeekNumber, formatWeekLabel } = await import('/src/lib/calendar.ts');
+
+      const cfg = await getConfig() || currentConfig;
+      currentConfig = cfg;
+      const events = await getAllEvents();
+      const { start, end } = getWeekRange(weekStart, cfg);
+      const timeSlots = generateTimeSlots(cfg);
+      const eventsBySlot = getEventsForWeek(events, start, end, cfg);
+
+      renderCalendar(cfg, timeSlots, eventsBySlot, start, end);
+      updateWeekLabel(start, end, cfg);
+    } catch (error) {
+      console.error('Error loading week:', error);
+      window.toastError?.('Error al cargar la semana');
+    }
+  }
+
+  function renderCalendar(cfg: any, timeSlots: string[], eventsBySlot: Map<string, any[]>, start: Date, end: Date) {
+    const { DAY_NAMES_SHORT } = await import('/src/types/index.ts');
+
+    // Render time column
+    const timeColumn = document.getElementById('time-slots');
+    if (timeColumn) {
+      timeColumn.innerHTML = timeSlots.map((slot, index) => `
+        <div class="flex items-end justify-end min-h-[60px] pb-2 text-xs font-mono text-text-muted select-none" style="height: 60px;" aria-label="Hora: ${slot}">
+          ${slot}
+          ${index < timeSlots.length - 1 ? '<div class="absolute w-full border-t border-oled-neutral/30" style="bottom: 0; left: 0;" aria-hidden="true" />' : ''}
+        </div>
+      `).join('');
+    }
+
+    // Render day columns
+    const dayColumns = document.getElementById('day-columns');
+    if (!dayColumns) return;
+
+    const columns = dayOrder.map((day, idx) => {
+      const dayDate = new Date(start);
+      dayDate.setDate(start.getDate() + idx);
+      const dateStr = dayDate.toISOString().split('T')[0];
+      const isActive = cfg.activeDays.includes(day);
+
+      let slotsHtml = timeSlots.map((slot, si) => {
+        const key = `${dateStr}-${slot}`;
+        const dayEvents = eventsBySlot.get(key) || [];
+        const isLast = si === timeSlots.length - 1;
+
+        const eventsHtml = dayEvents.map((event: any, ei: number) => `
+          <div class="pill-event relative z-10 mx-1 my-0.5 animate-scale-in" data-event-id="${event.id}" style="border-left-color: ${event.color};" tabindex="0" role="listitem" aria-label="${event.title} - ${event.gameName}">
+            <img src="${event.gameCover}" alt="" class="w-4 h-6 object-cover rounded-sm flex-shrink-0" loading="lazy" onerror="this.style.display='none'" />
+            <span class="truncate max-w-[140px] font-mono text-pill font-medium text-white">${event.title}</span>
+            <span class="badge ${['badge-stream','badge-video','badge-event','badge-collab'][['stream','video','event','collab'].indexOf(event.type)] || 'badge-stream'} ml-1 flex-shrink-0">
+              ${event.type === 'stream' ? '🔴' : event.type === 'video' ? '📹' : event.type === 'event' ? '📅' : '🤝'}
+            </span>
+            <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-oled-elevated border border-oled-neutral rounded-card-sm text-xs font-mono text-text-secondary whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-fast z-tooltip pointer-events-none">
+              <div class="font-medium text-white">${event.gameName}</div>
+              <div>${event.title}</div>
+              <div class="text-text-muted">${event.platforms.join(', ')}</div>
+              ${event.notes ? `<div class="truncate max-w-[200px]">${event.notes}</div>` : ''}
+            </div>
+          </div>
+        `).join('');
+
+        const addButton = isActive ? `
+          <button type="button" class="absolute inset-0 w-full h-full flex items-center justify-center text-text-muted/30 hover:text-oled-light/50 hover:bg-oled-neutral/20 transition-all duration-fast rounded-card-sm mx-1 my-0.5" data-create-day="${day}" data-create-time="${slot}" aria-label="Crear evento en ${DAY_NAMES_SHORT[day as keyof typeof DAY_NAMES_SHORT]} a las ${slot}"><span class="text-xs font-mono">+</span></button>
+        ` : '';
+
+        return `
+          <div class="relative min-h-[60px] border-b border-oled-neutral/30" data-time="${slot}" data-slot-key="${key}">
+            ${eventsHtml}
+            ${addButton}
+            ${!isLast ? '<div class="absolute bottom-0 left-2 right-2 border-t border-oled-neutral/20" aria-hidden="true" />' : ''}
+          </div>
+        `;
+      }).join('');
+
+      return `
+        <div class="flex-1 min-w-0 relative" data-day="${day}" data-date="${dateStr}" data-active="${isActive}" role="gridcell" aria-label="${DAY_NAMES_SHORT[day as keyof typeof DAY_NAMES_SHORT]}">
+          <div class="sticky top-0 z-10 px-2 py-2 text-center font-mono text-pill font-medium border-b border-oled-neutral ${isActive ? 'bg-oled-dark text-white' : 'bg-oled-inactive text-text-muted'}">
+            <span class="flex items-center justify-center gap-1.5">
+              ${DAY_NAMES_SHORT[day as keyof typeof DAY_NAMES_SHORT]}
+              <span class="text-xs font-sans">${dayDate.getDate()}</span>
+              ${!isActive ? '<span class="badge badge-warning ml-1">⚠ INACTIVO</span>' : ''}
+            </span>
+          </div>
+          <div class="flex flex-col min-h-[calc(100vh-120px)]" role="list" aria-label="Eventos de ${DAY_NAMES_SHORT[day as keyof typeof DAY_NAMES_SHORT]}">
+            ${slotsHtml}
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    dayColumns.innerHTML = columns;
+    attachEventListeners();
+  }
+
+  function attachEventListeners() {
+    document.querySelectorAll('[data-create-day]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const target = e.currentTarget as HTMLElement;
+        const day = parseInt(target.dataset.createDay!);
+        const time = target.dataset.createTime!;
+        window.openEventModal?.(null, { day, time });
+      });
+    });
+
+    document.querySelectorAll('[data-event-id]').forEach(pill => {
+      pill.addEventListener('click', (e) => {
+        if ((e.target as HTMLElement).closest('button')) return;
+        const eventId = pill.getAttribute('data-event-id');
+        window.openEventModal?.(eventId);
+      });
+    });
+
+    document.querySelectorAll('.pill-event').forEach(el => {
+      el.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          const eventId = el.getAttribute('data-event-id');
+          window.openEventModal?.(eventId);
+        }
+      });
+    });
+  }
+
+  function updateWeekLabel(start: Date, end: Date, cfg: any) {
+    const { formatWeekLabel, getWeekNumber } = await import('/src/lib/calendar.ts');
+    const label = document.getElementById('week-label');
+    if (label) {
+      label.textContent = `Semana ${getWeekNumber(start)} · ${formatWeekLabel(start, cfg)}`;
+    }
+  }
+
+  document.getElementById('prev-week')?.addEventListener('click', () => {
+    currentWeekStart = new Date(currentWeekStart.getTime() - 7 * 86400000);
+    loadWeek(currentWeekStart);
+  });
+
+  document.getElementById('next-week')?.addEventListener('click', () => {
+    currentWeekStart = new Date(currentWeekStart.getTime() + 7 * 86400000);
+    loadWeek(currentWeekStart);
+  });
+
+  document.getElementById('today-week')?.addEventListener('click', () => {
+    currentWeekStart = new Date();
+    loadWeek(currentWeekStart);
+  });
+
+  document.getElementById('share-btn')?.addEventListener('click', async () => {
+    const { getConfig, getAllEvents } = await import('/src/lib/idb.ts');
+    const { generateShareLink } = await import('/src/lib/share.ts');
+
+    const cfg = await getConfig();
+    const events = await getAllEvents();
+    const { url, qrCodeDataUrl } = await generateShareLink(cfg!, events, cfg?.username);
+
+    const modal = document.getElementById('share-modal');
+    if (modal) {
+      (modal as any)._show?.(url, qrCodeDataUrl, cfg?.username);
+    }
+  });
+
+  window.openEventModal = (eventId: string | null, initialData?: { day: number; time: string }) => {
+    const modal = document.getElementById('event-modal');
+    if (modal) {
+      (modal as any)._show?.(eventId, initialData);
+    }
+  };
+
+  window.closeEventModal = () => {
+    const modal = document.getElementById('event-modal');
+    if (modal) {
+      (modal as any)._hide?.();
+    }
+  };
+
+  window.saveEventFromModal = async (data: any) => {
+    const { saveEvent, generateId } = await import('/src/lib/idb.ts');
+    const { createEventFromForm } = await import('/src/lib/calendar.ts');
+
+    const event = createEventFromForm(data);
+    await saveEvent(event);
+    window.toastSuccess?.('Evento guardado');
+    loadWeek(currentWeekStart);
+  };
+
+  window.deleteEventFromModal = async (id: string) => {
+    const { deleteEvent } = await import('/src/lib/idb.ts');
+    if (confirm('¿Eliminar este evento?')) {
+      await deleteEvent(id);
+      window.toastSuccess?.('Evento eliminado');
+      loadWeek(currentWeekStart);
+    }
+  };
+
+  window.openGameSearchModal = () => {
+    const input = document.getElementById('game-search') as HTMLInputElement;
+    input.focus();
+  };
+
+  window.closeShareModal = () => {
+    const modal = document.getElementById('share-modal');
+    if (modal) {
+      (modal as any)._hide?.();
+    }
+  };
+
+  window.copyShareLink = async () => {
+    const input = document.getElementById('share-url-input') as HTMLInputElement;
+    await navigator.clipboard.writeText(input.value);
+    window.toastSuccess?.('Link copiado al portapapeles');
+  };
+
+  window.downloadShareICS = () => {
+    window.toastInfo?.('Descargando .ics...');
+  };
+
+  window.exportShareImage = () => {
+    document.getElementById('export-image-btn')?.click();
+  };
+
+  window.exportShareJSON = async () => {
+    const { getConfig, getAllEvents } = await import('/src/lib/idb.ts');
+    const { exportToJSON } = await import('/src/lib/share.ts');
+
+    const cfg = await getConfig();
+    const events = await getAllEvents();
+    exportToJSON(cfg!, events, cfg?.username);
+    window.toastSuccess?.('JSON exportado');
+  };
+
+  window.deleteEvent = async (id: string) => {
+    const { deleteEvent } = await import('/src/lib/idb.ts');
+    if (confirm('¿Eliminar este evento?')) {
+      await deleteEvent(id);
+      window.toastSuccess?.('Evento eliminado');
+      loadWeek(currentWeekStart);
+    }
+  };
+
+  // Initial load
+  loadWeek(currentWeekStart);
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowLeft' && (e.ctrlKey || e.metaKey)) {
+      e.preventDefault();
+      currentWeekStart = new Date(currentWeekStart.getTime() - 7 * 86400000);
+      loadWeek(currentWeekStart);
+    } else if (e.key === 'ArrowRight' && (e.ctrlKey || e.metaKey)) {
+      e.preventDefault();
+      currentWeekStart = new Date(currentWeekStart.getTime() + 7 * 86400000);
+      loadWeek(currentWeekStart);
+    }
+  });
+</script>
+
+<style is:global>
+  .image-rendering-pixelated {
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+  }
+</style>

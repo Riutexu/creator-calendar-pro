@@ -1,0 +1,23 @@
+---
+interface Props {
+  timeSlots: string[];
+  class?: string;
+}
+const { timeSlots = [], class: className = '' } = Astro.props;
+---
+<div class={`flex-none min-w-[72px] max-w-[96px] sticky left-0 z-sticky bg-oled-black/95 backdrop-blur-sm border-r border-oled-neutral px-2 py-2 ${className}`} role="rowheader">
+  <div class="flex flex-col">
+    {timeSlots.map((slot, index) => (
+      <div
+        class="flex items-end justify-end min-h-[60px] pb-2 text-xs font-mono text-text-muted select-none"
+        style="height: 60px;"
+        aria-label={`Hora: ${slot}`}
+      >
+        {slot}
+        {index < timeSlots.length - 1 && (
+          <div class="absolute w-full border-t border-oled-neutral/30" style="bottom: 0; left: 0;" aria-hidden="true" />
+        )}
+      </div>
+    ))}
+  </div>
+</div>
