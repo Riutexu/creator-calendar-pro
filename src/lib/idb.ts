@@ -1,4 +1,4 @@
-import { openDB, DBSchema, IDBPDatabase } from 'idb';
+import { openDB, type DBSchema, type IDBPDatabase } from 'idb';
 import type { CalendarEvent, CreatorConfig, ShareData } from '@/types';
 
 interface CalendarDB extends DBSchema {
@@ -18,7 +18,7 @@ interface CalendarDB extends DBSchema {
   };
   cache: {
     key: string;
-    value: { data: unknown; timestamp: number };
+    value: { key: string; data: unknown; timestamp: number };
     indexes: { 'by-expiry': number };
   };
 }
@@ -80,12 +80,13 @@ export async function getConfig(): Promise<CreatorConfig | undefined> {
 
 export async function saveConfig(config: CreatorConfig): Promise<void> {
   const db = await getDB();
-  await db.put('config', { id: 'main', ...config });
+  await db.put('config', { ...config, id: 'main' });
 }
 
-export async function getShare(hash: string): Promise<ShareData | undefined> {
+export async function getShare(hash: string): Promise<ShareData | null> {
   const db = await getDB();
-  return db.get('shares', hash);
+  const result = await db.get('shares', hash);
+  return result ?? null;
 }
 
 export async function saveShare(share: ShareData): Promise<void> {

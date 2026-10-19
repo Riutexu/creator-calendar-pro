@@ -12,6 +12,7 @@ export interface CreatorConfig {
   timezone: string;               // IANA timezone
   username?: string;              // Para links compartidos
   theme?: 'oled';                 // Futuro: temas
+  id?: string;                    // Para almacenamiento en IndexedDB
 }
 
 export interface CalendarEvent {
@@ -76,6 +77,7 @@ export interface ShareData {
   events: CalendarEvent[];
   exportedAt: string;
   exportedBy: string;
+  hash: string;
 }
 
 export interface ExportImageOptions {

@@ -33,8 +33,10 @@ export function createTouchDragHandler(options: TouchDragOptions = {}) {
   };
 
   function handleStart(event: TouchEvent | MouseEvent, target: HTMLElement): void {
-    const clientX = 'touches' in event ? event.touches[0].clientX : event.clientX;
-    const clientY = 'touches' in event ? event.touches[0].clientY : event.clientY;
+    const isTouch = 'touches' in event;
+    const touch = isTouch ? event.touches[0] : null;
+    const clientX = touch ? touch.clientX : (event as MouseEvent).clientX;
+    const clientY = touch ? touch.clientY : (event as MouseEvent).clientY;
 
     state = {
       isDragging: false,
@@ -56,8 +58,10 @@ export function createTouchDragHandler(options: TouchDragOptions = {}) {
   function handleMove(event: TouchEvent | MouseEvent): void {
     if (!state.target) return;
 
-    const clientX = 'touches' in event ? event.touches[0].clientX : event.clientX;
-    const clientY = 'touches' in event ? event.touches[0].clientY : event.clientY;
+    const isTouch = 'touches' in event;
+    const touch = isTouch ? event.touches[0] : null;
+    const clientX = touch ? touch.clientX : (event as MouseEvent).clientX;
+    const clientY = touch ? touch.clientY : (event as MouseEvent).clientY;
 
     state.currentX = clientX;
     state.currentY = clientY;
@@ -125,7 +129,9 @@ export function createHorizontalScrollDrag(element: HTMLElement) {
 
   const handleMouseDown = (e: MouseEvent | TouchEvent) => {
     isDown = true;
-    startX = 'touches' in e ? e.touches[0].pageX : e.pageX;
+    const isTouch = 'touches' in e;
+    const touch = isTouch ? e.touches[0] : null;
+    startX = touch ? touch.pageX : (e as MouseEvent).pageX;
     scrollLeft = element.scrollLeft;
     element.style.cursor = 'grabbing';
     element.style.scrollBehavior = 'auto';
@@ -134,7 +140,9 @@ export function createHorizontalScrollDrag(element: HTMLElement) {
   const handleMouseMove = (e: MouseEvent | TouchEvent) => {
     if (!isDown) return;
     e.preventDefault();
-    const x = 'touches' in e ? e.touches[0].pageX : e.pageX;
+    const isTouch = 'touches' in e;
+    const touch = isTouch ? e.touches[0] : null;
+    const x = touch ? touch.pageX : (e as MouseEvent).pageX;
     const walk = (x - startX) * 1.5;
     element.scrollLeft = scrollLeft - walk;
   };

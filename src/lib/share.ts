@@ -8,18 +8,19 @@ export async function generateShareLink(
   events: CalendarEvent[],
   username?: string
 ): Promise<{ hash: string; url: string; qrCodeDataUrl: string }> {
+  const hash = generateShareHash();
   const shareData: ShareData = {
     version: 1,
     config: sanitizeConfigForShare(config),
     events: sanitizeEventsForShare(events),
     exportedAt: new Date().toISOString(),
     exportedBy: username || 'anonymous',
+    hash,
   };
 
-  const hash = generateShareHash();
   shareData.config.username = username;
 
-  await saveShare({ ...shareData, hash });
+  await saveShare(shareData);
 
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
   const url = `${baseUrl}/shared?hash=${hash}`;

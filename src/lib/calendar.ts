@@ -25,8 +25,8 @@ export function formatWeekLabel(date: Date = new Date(), config: CreatorConfig):
 
 export function generateTimeSlots(config: CreatorConfig): string[] {
   const slots: string[] = [];
-  const [startH, startM] = config.streamingWindow.start.split(':').map(Number);
-  const [endH, endM] = config.streamingWindow.end.split(':').map(Number);
+  const [startH, startM] = config.streamingWindow.start.split(':').map(Number) as [number, number];
+  const [endH, endM] = config.streamingWindow.end.split(':').map(Number) as [number, number];
 
   let current = setMinutes(setHours(new Date(), startH), startM);
   const endTime = setMinutes(setHours(new Date(), endH), endM);
@@ -50,16 +50,16 @@ function addMinutes(date: Date, minutes: number): Date {
 export function getEventsForWeek(events: CalendarEvent[], weekStart: Date, weekEnd: Date, config: CreatorConfig): Map<string, CalendarEvent[]> {
   const eventsBySlot = new Map<string, CalendarEvent[]>();
 
-  const weekStartISO = startOfDay(weekStart).toISOString();
-  const weekEndISO = endOfDay(weekEnd).toISOString();
+  const weekStartDate = startOfDay(weekStart);
+  const weekEndDate = endOfDay(weekEnd);
 
   for (const event of events) {
     const eventStart = parseISO(event.start);
     const eventEnd = parseISO(event.end);
 
-    if (isWithinInterval(eventStart, { start: weekStartISO, end: weekEndISO }) ||
-        isWithinInterval(eventEnd, { start: weekStartISO, end: weekEndISO }) ||
-        (eventStart <= weekStartISO && eventEnd >= weekEndISO)) {
+    if (isWithinInterval(eventStart, { start: weekStartDate, end: weekEndDate }) ||
+        isWithinInterval(eventEnd, { start: weekStartDate, end: weekEndDate }) ||
+        (eventStart <= weekStartDate && eventEnd >= weekEndDate)) {
       const dayKey = formatDate(eventStart, 'yyyy-MM-dd');
       const timeKey = formatDate(eventStart, 'HH:mm');
       const key = `${dayKey}-${timeKey}`;
@@ -88,7 +88,7 @@ export function getEventsForDay(events: CalendarEvent[], date: Date): CalendarEv
 }
 
 export function getEventPosition(event: CalendarEvent, config: CreatorConfig): { top: number; height: number } {
-  const [startH, startM] = config.streamingWindow.start.split(':').map(Number);
+  const [startH, startM] = config.streamingWindow.start.split(':').map(Number) as [number, number];
   const eventStart = parseISO(event.start);
   const eventEnd = parseISO(event.end);
 
@@ -148,12 +148,12 @@ export function hashString(str: string): number {
 }
 
 export function parseTimeString(timeStr: string, baseDate: Date = new Date()): Date {
-  const [hours, minutes] = timeStr.split(':').map(Number);
+  const [hours, minutes] = timeStr.split(':').map(Number) as [number, number];
   return setMinutes(setHours(baseDate, hours), minutes);
 }
 
 export function timeStringToMinutes(timeStr: string): number {
-  const [hours, minutes] = timeStr.split(':').map(Number);
+  const [hours, minutes] = timeStr.split(':').map(Number) as [number, number];
   return hours * 60 + minutes;
 }
 
