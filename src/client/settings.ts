@@ -1,5 +1,5 @@
 // Client-side settings logic
-import { getConfig, saveConfig, getAllEvents, getDB } from '@/lib/idb';
+import { getConfig, saveConfig, getAllEvents, getDB, saveEvent } from '@/lib/idb';
 import { validateConfig, getDefaultConfig } from '@/lib/calendar';
 import { exportToJSON, importFromJSON, downloadICS, generateShareLink } from '@/lib/share';
 import { createSteamGridDBClient } from '@/lib/steamgriddb';
@@ -15,7 +15,7 @@ interface CalendarConfig {
   id?: string;
 }
 
-const config: CalendarConfig = { ...DEFAULT_CONFIG };
+const config: CalendarConfig = { ...DEFAULT_CONFIG, username: '' };
 
 function updateActiveDaysUI(activeDays: number[]) {
   document.querySelectorAll('[data-day]').forEach(btn => {
@@ -24,7 +24,7 @@ function updateActiveDaysUI(activeDays: number[]) {
     btn.classList.toggle('pill-active-day', isActive);
     btn.classList.toggle('pill-inactive-day', !isActive);
     btn.setAttribute('aria-pressed', String(isActive));
-    const indicator = btn.querySelector('span:last-child') as HTMLElement;
+    const indicator = btn.querySelector('span:last-child') as HTMLElement | null;
     if (indicator) {
       indicator.className = `w-2 h-2 rounded-full ${isActive ? 'bg-oled-light' : 'bg-oled-neutral'}`;
     }
@@ -32,7 +32,7 @@ function updateActiveDaysUI(activeDays: number[]) {
 }
 
 (window as any).toggleActiveDay = async (day: number) => {
-  const cfg = (await getConfig()) || config;
+  const cfg = ((await getConfig()) as CalendarConfig | undefined) || config;
   const newActiveDays = cfg.activeDays.includes(day)
     ? cfg.activeDays.filter(d => d !== day)
     : [...cfg.activeDays, day].sort((a, b) => a - b);
@@ -43,11 +43,11 @@ function updateActiveDaysUI(activeDays: number[]) {
 };
 
 (window as any).updateStreamingWindow = async (window_: { start: string; end: string }) => {
-  const cfg = (await getConfig()) || config;
+  const cfg = ((await getConfig()) as CalendarConfig | undefined) || config;
 
   const validation = validateConfig({ streamingWindow: window_ });
   if (!validation.valid) {
-    toastError?.(validation.errors[0]);
+    toastError?.(validation.errors[0] ?? 'Error de validación');
     return;
   }
 
@@ -56,15 +56,17 @@ function updateActiveDaysUI(activeDays: number[]) {
 };
 
 (window as any).saveApiKey = async (key: string) => {
-  const cfg = (await getConfig()) || config;
+  const cfg = ((await getConfig()) as CalendarConfig | undefined) || config;
   await saveConfig({ ...cfg, steamGridDbKey: key.trim() });
   toastSuccess?.('API Key guardada');
 };
 
 (window as any).testApiKey = async () => {
-  const input = document.getElementById('api-key') as HTMLInputElement;
-  const statusEl = document.getElementById('api-key-status');
-  const testBtn = document.querySelector('button[onclick="window.testApiKey?.()"]') as HTMLButtonElement;
+  const input = document.getElementById('api-key') as HTMLInputElement | null;
+  const statusEl = document.getElementById('api-key-status') as HTMLElement | null;
+  const testBtn = document.querySelector('button[onclick="window.testApiKey?.()"]') as HTMLButtonElement | null;
+
+  if (!input || !statusEl || !testBtn) return;
 
   const key = input.value.trim();
   if (!key) {
@@ -129,8 +131,8 @@ function updateActiveDaysUI(activeDays: number[]) {
 
 (window as any).importJSON = async (file: File | undefined) => {
   if (!file) return;
-  const { importFromJSON } = await import('/src/lib/share.ts');
-  const { saveEvent, saveConfig } = await import('/src/lib/idb.ts');
+  const { importFromJSON } = await import('@/lib/share');
+  const { saveEvent, saveConfig } = await import('@/lib/idb');
 
   try {
     const { config: importedConfig, events: importedEvents } = await importFromJSON(file);
@@ -163,6 +165,6 @@ function updateActiveDaysUI(activeDays: number[]) {
 
 // Initialize active days UI on load
 document.addEventListener('DOMContentLoaded', async () => {
-  const cfg = (await getConfig()) || config;
+  const cfg = ((await getConfig()) as CalendarConfig | undefined) || config;
   updateActiveDaysUI(cfg.activeDays);
 });

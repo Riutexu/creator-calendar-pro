@@ -2,11 +2,11 @@
 import { getDefaultConfig } from '@/lib/calendar';
 import { getShareData, parseShareHashFromUrl } from '@/lib/share';
 import { getWeekRange, generateTimeSlots, getEventsForWeek, getWeekNumber, formatWeekLabel } from '@/lib/calendar';
-import { DAY_NAMES_SHORT } from '@/types';
+import { DAY_NAMES_SHORT, type DayOfWeek } from '@/types';
 import { toastError } from '@/lib/toast';
 
 const config = getDefaultConfig();
-const dayOrder = [1, 2, 3, 4, 5, 6, 0];
+const dayOrder: DayOfWeek[] = [1, 2, 3, 4, 5, 6, 0];
 
 let currentConfig = { ...config };
 let currentEvents: any[] = [];
@@ -43,8 +43,8 @@ async function loadShareData() {
   }
 }
 
-function renderCalendar() {
-  const { generateTimeSlots, getWeekRange, getEventsForWeek, getWeekNumber, formatWeekLabel } = await import('/src/lib/calendar.ts');
+async function renderCalendar() {
+  const { generateTimeSlots, getWeekRange, getEventsForWeek, getWeekNumber, formatWeekLabel } = await import('@/lib/calendar');
   const cfg = currentConfig;
   const { start, end } = getWeekRange(currentWeekStart, cfg);
   const timeSlots = generateTimeSlots(cfg);
@@ -101,15 +101,15 @@ function renderCalendar() {
     }).join('');
 
     return `
-      <div class="flex-1 min-w-0 relative" data-day="${day}" data-date="${dateStr}" data-active="${isActive}" role="gridcell" aria-label="${DAY_NAMES_SHORT[day]}">
+      <div class="flex-1 min-w-0 relative" data-day="${day}" data-date="${dateStr}" data-active="${isActive}" role="gridcell" aria-label="${DAY_NAMES_SHORT[day as keyof typeof DAY_NAMES_SHORT]}">
         <div class="sticky top-0 z-10 px-2 py-2 text-center font-mono text-pill font-medium border-b border-oled-neutral ${isActive ? 'bg-oled-dark text-white' : 'bg-oled-inactive text-text-muted'}">
           <span class="flex items-center justify-center gap-1.5">
-            ${DAY_NAMES_SHORT[day]}
+            ${DAY_NAMES_SHORT[day as keyof typeof DAY_NAMES_SHORT]}
             <span class="text-xs font-sans">${dayDate.getDate()}</span>
             ${!isActive ? '<span class="badge badge-warning ml-1">⚠ INACTIVO</span>' : ''}
           </span>
         </div>
-        <div class="flex flex-col min-h-[calc(100vh-120px)]" role="list" aria-label="Eventos de ${DAY_NAMES_SHORT[day]}">
+        <div class="flex flex-col min-h-[calc(100vh-120px)]" role="list" aria-label="Eventos de ${DAY_NAMES_SHORT[day as keyof typeof DAY_NAMES_SHORT]}">
           ${slotsHtml}
         </div>
       </div>

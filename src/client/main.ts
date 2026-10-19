@@ -3,12 +3,10 @@ import { getConfig, getAllEvents, saveEvent, deleteEvent } from '@/lib/idb';
 import { getWeekRange, generateTimeSlots, getEventsForWeek, getWeekNumber, formatWeekLabel, createEventFromForm } from '@/lib/calendar';
 import { generateShareLink, exportToJSON, downloadICS } from '@/lib/share';
 import { toastSuccess, toastError, toastInfo } from '@/lib/toast';
-import { DAY_NAMES_SHORT } from '@/types';
+import { DAY_NAMES_SHORT, type DayOfWeek } from '@/types';
+import type { CalendarEvent, CreatorConfig } from '@/types';
 
-interface CalendarConfig {
-  activeDays: number[];
-  streamingWindow: { start: string; end: string };
-  timezone: string;
+interface CalendarConfig extends Omit<CreatorConfig, 'username'> {
   username: string;
 }
 
@@ -17,13 +15,14 @@ let currentConfig: CalendarConfig = {
   streamingWindow: { start: '18:00', end: '02:00' },
   timezone: 'Europe/Madrid',
   username: '',
+  steamGridDbKey: undefined,
 };
 let currentWeekStart = new Date();
 
 export async function loadWeek(weekStart: Date) {
   currentWeekStart = weekStart;
   try {
-    const cfg = (await getConfig()) || currentConfig;
+    const cfg = ((await getConfig()) as CalendarConfig | undefined) || currentConfig;
     currentConfig = cfg;
     const events = await getAllEvents();
     const { start, end } = getWeekRange(weekStart, cfg);
@@ -38,7 +37,7 @@ export async function loadWeek(weekStart: Date) {
   }
 }
 
-function renderCalendar(cfg: CalendarConfig, timeSlots: string[], eventsBySlot: Map<string, any[]>, start: Date, end: Date) {
+function renderCalendar(cfg: CalendarConfig, timeSlots: string[], eventsBySlot: Map<string, CalendarEvent[]>, start: Date, end: Date) {
   // Render time column
   const timeColumn = document.getElementById('time-slots');
   if (timeColumn) {
@@ -53,7 +52,7 @@ function renderCalendar(cfg: CalendarConfig, timeSlots: string[], eventsBySlot: 
   const dayColumns = document.getElementById('day-columns');
   if (!dayColumns) return;
 
-  const dayOrder = [1, 2, 3, 4, 5, 6, 0];
+  const dayOrder: DayOfWeek[] = [1, 2, 3, 4, 5, 6, 0];
   const columns = dayOrder.map((day, idx) => {
     const dayDate = new Date(start);
     dayDate.setDate(start.getDate() + idx);
@@ -65,7 +64,7 @@ function renderCalendar(cfg: CalendarConfig, timeSlots: string[], eventsBySlot: 
       const dayEvents = eventsBySlot.get(key) || [];
       const isLast = si === timeSlots.length - 1;
 
-      const eventsHtml = dayEvents.map((event: any, ei: number) => `
+      const eventsHtml = dayEvents.map((event: CalendarEvent, ei: number) => `
         <div class="pill-event relative z-10 mx-1 my-0.5 animate-scale-in" data-event-id="${event.id}" style="border-left-color: ${event.color};" tabindex="0" role="listitem" aria-label="${event.title} - ${event.gameName}">
           <img src="${event.gameCover}" alt="" class="w-4 h-6 object-cover rounded-sm flex-shrink-0" loading="lazy" onerror="this.style.display='none'" />
           <span class="truncate max-w-[140px] font-mono text-pill font-medium text-white">${event.title}</span>
@@ -82,7 +81,7 @@ function renderCalendar(cfg: CalendarConfig, timeSlots: string[], eventsBySlot: 
       `).join('');
 
       const addButton = isActive ? `
-        <button type="button" class="absolute inset-0 w-full h-full flex items-center justify-center text-text-muted/30 hover:text-oled-light/50 hover:bg-oled-neutral/20 transition-all duration-fast rounded-card-sm mx-1 my-0.5" data-create-day="${day}" data-create-time="${slot}" aria-label="Crear evento en ${DAY_NAMES_SHORT[day]} a las ${slot}"><span class="text-xs font-mono">+</span></button>
+        <button type="button" class="absolute inset-0 w-full h-full flex items-center justify-center text-text-muted/30 hover:text-oled-light/50 hover:bg-oled-neutral/20 transition-all duration-fast rounded-card-sm mx-1 my-0.5" data-create-day="${day}" data-create-time="${slot}" aria-label="Crear evento en ${DAY_NAMES_SHORT[day as DayOfWeek]} a las ${slot}"><span class="text-xs font-mono">+</span></button>
       ` : '';
 
       return `
@@ -95,15 +94,15 @@ function renderCalendar(cfg: CalendarConfig, timeSlots: string[], eventsBySlot: 
     }).join('');
 
     return `
-      <div class="flex-1 min-w-0 relative" data-day="${day}" data-date="${dateStr}" data-active="${isActive}" role="gridcell" aria-label="${DAY_NAMES_SHORT[day]}">
+      <div class="flex-1 min-w-0 relative" data-day="${day}" data-date="${dateStr}" data-active="${isActive}" role="gridcell" aria-label="${DAY_NAMES_SHORT[day as DayOfWeek]}">
         <div class="sticky top-0 z-10 px-2 py-2 text-center font-mono text-pill font-medium border-b border-oled-neutral ${isActive ? 'bg-oled-dark text-white' : 'bg-oled-inactive text-text-muted'}">
           <span class="flex items-center justify-center gap-1.5">
-            ${DAY_NAMES_SHORT[day]}
+            ${DAY_NAMES_SHORT[day as DayOfWeek]}
             <span class="text-xs font-sans">${dayDate.getDate()}</span>
             ${!isActive ? '<span class="badge badge-warning ml-1">⚠ INACTIVO</span>' : ''}
           </span>
         </div>
-        <div class="flex flex-col min-h-[calc(100vh-120px)]" role="list" aria-label="Eventos de ${DAY_NAMES_SHORT[day]}">
+        <div class="flex flex-col min-h-[calc(100vh-120px)]" role="list" aria-label="Eventos de ${DAY_NAMES_SHORT[day as DayOfWeek]}">
           ${slotsHtml}
         </div>
       </div>
@@ -133,7 +132,7 @@ function attachEventListeners() {
   });
 
   document.querySelectorAll('.pill-event').forEach(el => {
-    el.addEventListener('keydown', (e) => {
+    (el as HTMLElement).addEventListener('keydown', (e: KeyboardEvent) => {
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
         const eventId = el.getAttribute('data-event-id');
