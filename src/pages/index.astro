@@ -1,186 +1,282 @@
 ---
-import BaseLayout from '@/layouts/BaseLayout.astro';
-import { DAY_NAMES_SHORT } from '@/types';
-import ExportImageButton from '@/components/Calendar/ExportImageButton.astro';
-import EventModal from '@/components/Modals/EventModal.astro';
-import ShareModal from '@/components/Modals/ShareModal.astro';
+import Layout from '@/layouts/BaseLayout.astro';
 
-const config = {
-  activeDays: [1,2,5,0],
-  streamingWindow: {start: '18:00', end: '02:00'},
-  timezone: 'Europe/Madrid',
-  username: '',
-};
-const today = new Date();
-const dayOrder = [1, 2, 3, 4, 5, 6, 0];
+const features = [
+  {
+    icon: '🎨',
+    title: 'Estética OLED Gaming',
+    description: 'Diseño puro negro con paleta azul gaming. Optimizado para pantallas OLED y modos oscuros.',
+  },
+  {
+    icon: '📅',
+    title: 'Calendario Semanal/Diario',
+    description: 'Vista semanal con franjas horarias y vista diaria detallada. Tu streaming bajo control.',
+  },
+  {
+    icon: '🎮',
+    title: 'SteamGridDB Integrado',
+    description: 'Portadas y banners oficiales de juegos automáticamente desde SteamGridDB.',
+  },
+  {
+    icon: '🔄',
+    title: 'Eventos Recurrentes',
+    description: 'Configura streams semanales, mensuales o personalizados que se repiten automáticamente.',
+  },
+  {
+    icon: '📸',
+    title: 'Exportar PNG/JPG',
+    description: 'Genera imágenes de tu calendario para compartir en redes sociales con un clic.',
+  },
+  {
+    icon: '🔗',
+    title: 'Compartir Read-Only',
+    description: 'Genera enlaces públicos para tu comunidad sin dar acceso de edición.',
+  },
+  {
+    icon: '📱',
+    title: 'PWA Instalable',
+    description: 'Instala como app nativa en Windows, Mac, Linux, Android e iOS. Funciona offline.',
+  },
+  {
+    icon: '🔐',
+    title: '100% Privado y Gratis',
+    description: 'Todo en tu navegador (IndexedDB). Sin servidores, sin tracking, sin pagos, para siempre.',
+  },
+];
+
+const pricing = [
+  {
+    name: 'Gratis para Siempre',
+    price: '0€',
+    period: '/mes',
+    features: [
+      'Calendario semanal y diario',
+      'Días de streaming personalizables',
+      'Integración SteamGridDB',
+      'Exportar PNG/JPG',
+      'Compartir read-only',
+      'PWA instalable',
+      'Eventos recurrentes',
+      'Notificaciones',
+      'Exportar ICS/JSON',
+    ],
+    highlighted: false,
+  },
+  {
+    name: 'Pro',
+    price: '0€',
+    period: '/mes',
+    features: [
+      'Todo de Gratis',
+      'Sincronización multi-dispositivo',
+      'Colaboración en equipo',
+      'Temas de color personalizados',
+      'Soporte prioritario',
+    ],
+    highlighted: true,
+    note: 'También gratis. Porque creamos esto para la comunidad.',
+  },
+];
+
+const faqs = [
+  {
+    q: '¿Es realmente gratis?',
+    a: 'Sí, 100% gratis. No hay suscripciones, no hay pagos ocultos. Todo se guarda en tu navegador.',
+  },
+  {
+    q: '¿Necesito cuenta?',
+    a: 'No. Todo funciona en tu navegador. Puedes exportar tus datos en cualquier momento.',
+  },
+  {
+    q: '¿Qué es SteamGridDB?',
+    a: 'Es el sitio oficial de la comunidad aprobado por Steam para portadas y banners de juegos.',
+  },
+  {
+    q: '¿Puedo usarlo en móvil?',
+    "Sí, es una PWA. Instálalo como app en cualquier dispositivo y funciona offline.",
+  },
+];
+
 ---
 
-<BaseLayout
-  title="Creator Calendar Pro — Tu calendario semanal"
-  description="Calendario semanal OLED para creadores de contenido. Organiza tus streams, videos y eventos con portadas oficiales de SteamGridDB."
-  canonicalURL="https://riutexu.github.io/creator-calendar-pro/"
->
-  <!-- Header -->
-  <header class="sticky top-0 z-sticky bg-oled-black/95 backdrop-blur-xl border-b border-oled-neutral/30 px-4 py-3" role="banner">
-    <div class="max-w-full mx-auto flex items-center justify-between gap-4 flex-wrap">
-      <!-- Brand -->
-      <div class="flex items-center gap-3 min-w-0">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-oled-light to-oled-accent flex items-center justify-center flex-shrink-0" aria-hidden="true">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.5">
-            <rect x="3" y="4" width="18" height="18" rx="3" ry="3" />
-            <line x1="16" y1="2" x2="16" y2="6" />
-            <line x1="8" y1="2" x2="8" y2="6" />
-            <line x1="3" y1="10" x2="21" y2="10" />
-          </svg>
-        </div>
-        <div class="min-w-0">
-          <h1 class="font-display text-xl font-bold text-white truncate">Creator Calendar Pro</h1>
-          <p class="text-xs text-text-muted font-mono" id="week-label">Cargando semana...</p>
-        </div>
+<Layout title="Creator Calendar Pro — Calendario para Streamers y Creadores">
+  <!-- Hero Section -->
+  <section class="relative min-h-[70vh] flex flex-col items-center justify-center px-4 py-16 overflow-hidden">
+    <!-- Background gradient mesh -->
+    <div class="absolute inset-0 bg-gradient-to-tr from-oled-dark/80 to-black opacity-80" />
+    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-oled-light/10 rounded-full blur-[100px] animate-pulse" />
+    <div class="absolute bottom-0 right-1/2 translate-x-1/2 w-[600px] h-[600px] bg-oled-accent/10 rounded-full blur-[100px] animate-pulse" style="animation-delay: 2s;" />
+
+    <div class="relative z-10 text-center max-w-4xl">
+      <div class="inline-flex items-center gap-2 px-3 py-1 bg-oled-neutral/30 border border-oled-neutral/50 rounded-full text-xs font-mono text-oled-light mb-6 animate-fade-in">
+        <span class="w-2 h-2 rounded-full bg-oled-light animate-pulse"></span>
+        <span>Gratis para siempre · Sin tracking</span>
       </div>
-
-      <!-- Week Navigation -->
-      <nav class="flex items-center gap-2" aria-label="Navegación semanal" role="navigation">
-        <button id="prev-week" class="btn-ghost btn-icon" aria-label="Semana anterior" onclick="window.prevWeek?.()">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6" /></svg>
-        </button>
-        <button id="today-week" class="btn-secondary" aria-label="Esta semana" onclick="window.todayWeek?.()">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mr-1.5"><rect x="3" y="4" width="18" height="18" rx="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg>
-          <span class="hidden sm:inline">Hoy</span>
-        </button>
-        <button id="next-week" class="btn-ghost btn-icon" aria-label="Próxima semana" onclick="window.nextWeek?.()">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6" /></svg>
-        </button>
-      </nav>
-
-      <!-- Actions -->
-      <div class="flex items-center gap-2 ml-auto" role="group" aria-label="Acciones principales">
-        <ExportImageButton username={config.username} targetSelector=".calendar-main" />
-        
-        <!-- Share Button with Submenu -->
-        <div class="submenu-trigger relative">
-          <button id="share-btn" class="btn-secondary" aria-label="Compartir calendario" aria-haspopup="true" aria-expanded="false" onclick="window.toggleShareMenu?.(event)">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mr-1.5">
-              <circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" />
-              <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" /><line x1="15.41" y1="6.51" x2="8.58" y2="10.49" />
-            </svg>
-            <span class="hidden sm:inline">Compartir</span>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="ml-1"><polyline points="6 9 12 15 18 9" /></svg>
-          </button>
-          <div id="share-submenu" class="submenu hidden" role="menu" aria-label="Opciones de compartir">
-            <button class="submenu-item" role="menuitem" onclick="window.openShareModal?.(); window.closeShareMenu?.()">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" /><line x1="8.59" y1="13.51" x2="15.42" y2="17.49" /><line x1="15.41" y1="6.51" x2="8.58" y2="10.49" /></svg>
-              <span>Copiar link</span>
-            </button>
-            <button class="submenu-item" role="menuitem" onclick="window.exportShareImage?.(); window.closeShareMenu?.()">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><polyline points="21 15 16 10 5 21" /></svg>
-              <span>Exportar imagen</span>
-            </button>
-            <button class="submenu-item" role="menuitem" onclick="window.downloadShareICS?.(); window.closeShareMenu?.()">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /></svg>
-              <span>Descargar .ics</span>
-            </button>
-            <button class="submenu-item" role="menuitem" onclick="window.exportShareJSON?.(); window.closeShareMenu?.()">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /></svg>
-              <span>Exportar JSON</span>
-            </button>
-          </div>
-        </div>
-
-        <a href="/settings" class="btn-ghost btn-icon" aria-label="Configuración">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06-.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" /></svg>
+      <h1 class="text-5xl md:text-7xl font-display font-bold text-white mb-6 animate-fade-in" style="animation-delay: 100ms;">
+        <span class="text-oled-light">Creator Calendar Pro</span>
+      </h1>
+      <p class="text-lg md:text-2xl text-text-secondary mb-8 max-w-2xl animate-fade-in" style="animation-delay: 200ms;">
+        El calendario definitivo para streamers y creadores de contenido.
+        Organiza tus streams, videos y eventos con estilo OLED gaming.
+      </p>
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in" style="animation-delay: 300ms;">
+        <a href="/calendar" class="btn-primary btn-lg flex items-center justify-center gap-3">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg>
+          <span>Empezar Gratis</span>
+        </a>
+        <a href="/settings" class="btn-ghost btn-lg flex items-center justify-center gap-3">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06-.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" /></svg>
+          <span>Configuración</span>
         </a>
       </div>
     </div>
-  </header>
+  </section>
 
-  <!-- Calendar Section -->
-  <main class="calendar-main max-w-full mx-auto px-4 pb-20" role="main">
-    <!-- Week Header with Live Info -->
-    <div class="mb-4 flex items-center justify-between gap-4 flex-wrap">
-      <div class="flex items-center gap-3">
-        <div class="w-2 h-2 rounded-full bg-oled-light/50 animate-pulse" aria-hidden="true"></div>
-        <div>
-          <p class="text-xs text-text-muted font-mono" id="week-label">Cargando semana...</p>
-          <p class="text-xs text-text-dim font-mono" id="week-range">—</p>
+  <!-- Features Section -->
+  <section class="py-16 bg-oled-black">
+    <div class="max-w-7xl mx-auto px-4">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl md:text-4xl font-display font-bold text-white mb-4">Todo lo que necesitas para tu calendario de streaming</h2>
+        <p class="text-text-secondary">Diseñado específicamente para creadores de contenido y streamers</p>
+      </div>
+      <div class="grid md:grid-cols-3 gap-6">
+        {features.map(feature => `
+        <div class="card-elevated p-6 rounded-2xl hover:shadow-xl transition-all duration-300 group">
+          <div class="w-12 h-12 rounded-xl bg-oled-light/20 flex items-center justify-center mb-4 text-oled-light">
+            <span class="text-2xl">${feature.icon}</span>
+          </div>
+          <h3 class="text-xl font-bold text-white mb-3">${feature.title}</h3>
+          <p class="text-text-secondary text-sm leading-relaxed">${feature.description}</p>
+        </div>
+        `).join('')}
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Grid Detailed -->
+  <section class="py-16 bg-oled-dark/30">
+    <div class="max-w-7xl mx-auto px-4">
+      <div class="grid md:grid-cols-2 gap-12 items-center">
+        <div class="space-y-6">
+          <div class="flex items-start gap-4">
+            <div class="w-10 h-10 rounded-xl bg-oled-light/20 flex items-center justify-center text-oled-light">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 12" /></svg>
+            </div>
+            <div>
+              <h3 class="text-lg font-bold text-white">Vista Semanal y Diaria</h3>
+              <p class="text-text-secondary">Ve toda tu semana de streaming con franjas horarias, o enfócate en un día específico con la vista diaria detallada.</p>
+            </div>
+          </div>
+          <div class="flex items-start gap-4">
+            <div class="w-10 h-10 rounded-xl bg-oled-light/20 flex items-center justify-center text-oled-light">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" /><path d="M12 2v10m0 10v-10" /></svg>
+            </div>
+            <div>
+              <h3 class="text-lg font-bold text-white">Eventos Recurrentes</h3>
+              <p class="text-text-secondary">Configura streams que se repiten semanal, quincenal o mensualmente. Configura una vez y olvídate.</p>
+            </div>
+          </div>
+          <div class="flex items-start gap-4">
+            <div class="w-10 h-10 rounded-xl bg-oled-light/20 flex items-center justify-center text-oled-light">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2" /><line x1="9" y1="9" x2="21" y2="9" /></svg>
+            </div>
+            <div>
+              <h3 class="text-lg font-bold text-white">Exportar e Importar</h3>
+              <p class="text-text-secondary">Exporta a PNG/JPG para redes, .ics para Google Calendar, o JSON para respaldo completo.</p>
+            </div>
+          </div>
+        </div>
+        <div class="relative group">
+          <div class="absolute inset-0 bg-oled-dark/50 rounded-2xl blur-2xl opacity-50" />
+          <div class="relative z-10">
+            <div class="grid grid-cols-2 gap-2 p-4 bg-oled-dark border border-oled-neutral/30 rounded-xl shadow-xl">
+              <div class="bg-oled-neutral/30 p-3 rounded-lg text-center">
+                <div class="text-oled-light font-mono font-bold text-lg">7</div>
+                <div class="text-xs text-text-muted">Días activos</div>
+              </div>
+              <div class="bg-oled-neutral/30 p-3 rounded-lg text-center">
+                <div class="text-oled-light font-mono font-bold text-lg">24h</div>
+                <div class="text-xs text-text-muted">Ventana de streaming</div>
+              </div>
+              <div class="bg-oled-neutral/30 p-3 rounded-lg text-center">
+                <div class="text-oled-light font-mono font-bold text-lg">100%</div>
+                <div class="text-xs text-text-muted">Gratis para siempre</div>
+              </div>
+              <div class="bg-oled-neutral/30 p-3 rounded-lg text-center">
+                <div class="text-oled-light font-mono font-bold text-lg">∞</div>
+                <div class="text-xs text-text-muted">Eventos ilimitados</div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-      <div class="flex items-center gap-2 ml-auto flex-wrap">
-        <span class="text-xs text-text-dim font-mono hidden sm:block" id="timezone-display">Europe/Madrid</span>
-        <div class="w-px h-6 bg-oled-neutral/30 mx-2"></div>
-        <button class="btn-ghost btn-sm" onclick="window.openEventModal?.(null, { quick: true })" aria-label="Crear evento rápido">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
-          <span>Nuevo</span>
-        </button>
+    </div>
+  </section>
+
+  <!-- Pricing Section -->
+  <section class="py-16 bg-oled-black">
+    <div class="max-w-7xl mx-auto px-4">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl md:text-4xl font-display font-bold text-white mb-4">Precios simples y honestos</h2>
+        <p class="text-text-secondary">Todo gratis. Para siempre. Porque creamos esto para la comunidad.</p>
+      </div>
+      <div class="grid md:grid-cols-2 gap-6">
+        {pricing.map(plan => `
+        <div class="card-elevated p-8 rounded-2xl ${plan.highlighted ? 'border-oled-light/50 shadow-[0_0_40px_rgba(58,123,200,0.2)]' : ''} relative">
+          ${plan.highlighted ? `<div class="absolute -top-4 left-1/2 -translate-x-1/2 bg-oled-light text-oled-black px-4 py-1 rounded-full text-xs font-bold font-mono">MÁS POPULAR</div>` : ''}
+          <h3 class="text-xl font-bold text-white mb-2">${plan.name}</h3>
+          <div class="flex items-baseline gap-2 mb-6">
+            <span class="text-4xl font-bold text-white">${plan.price}</span>
+            <span class="text-text-muted">${plan.period}</span>
+          </div>
+          <ul class="space-y-3 mb-8">
+            ${plan.features.map(f => `
+            <li class="flex items-start gap-3">
+              <span class="text-oled-light">${plan.highlighted ? '✓' : '○'}</span>
+              <span class="text-sm text-text-secondary">${f}</span>
+            </li>
+            `).join('')}
+          </ul>
+          ${plan.highlighted ? `<p class="text-xs text-oled-light font-mono mb-6">${plan.note}</p>` : ''}
+          <a href="/calendar" class="btn-${plan.highlighted ? 'primary' : 'secondary'} w-full py-3 font-bold">
+            ${plan.highlighted ? 'Empezar Gratis' : 'Empezar Gratis'}
+          </a>
+        </div>
+        `).join('')}
       </div>
     </div>
+  </section>
 
-    <!-- Calendar Grid -->
-    <div class="grid grid-cols-calendar gap-0 overflow-hidden rounded-2xl border border-oled-neutral/30 bg-gradient-to-br from-oled-dark/50 to-oled-black max-w-full shadow-xl" id="calendar-grid" role="grid" aria-label="Calendario semanal">
-      <!-- Time Column -->
-      <div class="flex-none min-w-[72px] max-w-[96px] sticky left-0 z-sticky bg-oled-black/95 backdrop-blur-xl border-r border-oled-neutral/30 px-2 py-2" id="time-column" role="columnheader">
-        <div class="flex flex-col" id="time-slots" aria-label="Horas"></div>
+  <!-- FAQ Section -->
+  <section class="py-16 bg-oled-black">
+    <div class="max-w-4xl mx-auto px-4">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl md:text-4xl font-display font-bold text-white mb-4">Preguntas frecuentes</h2>
+        <p class="text-text-secondary">Todo lo que necesitas saber sobre Creator Calendar Pro</p>
       </div>
-
-      <!-- Day Columns -->
-      <div id="day-columns" role="rowgroup"></div>
+      <div class="space-y-3">
+        {faqs.map(faq => `
+        <div class="card border-oled-neutral/30 rounded-xl p-4">
+          <button class="w-full flex items-center justify-between py-3 text-left hover:text-oled-light transition-colors" onclick="this.nextElementSibling.classList.toggle('hidden')">
+            <span class="text-sm font-semibold text-white">${faq.q}</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9" /></svg>
+          </button>
+          <p class="text-sm text-text-secondary mt-3 hidden">${faq.a}</p>
+        </div>
+        `).join('')}
+      </div>
     </div>
+  </section>
 
-    <!-- Empty State (shown when no events) -->
-    <div id="empty-state" class="empty-state hidden" role="status" aria-live="polite">
-      <svg class="empty-state-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-        <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-        <line x1="16" y1="2" x2="16" y2="6" />
-        <line x1="8" y1="2" x2="8" y2="6" />
-        <line x1="3" y1="10" x2="21" y2="10" />
-        <line x1="8" y1="14" x2="16" y2="14" />
-        <line x1="8" y1="18" x2="16" y2="18" />
-      </svg>
-      <h3 class="empty-state-title">Semana libre</h3>
-      <p class="empty-state-description">No hay eventos programados. Haz clic en <kbd class="px-2 py-0.5 bg-oled-neutral/50 rounded text-xs font-mono">+</kbd> para crear tu primer stream.</p>
-      <button class="btn-primary" onclick="window.openEventModal?.(null, { quick: true })">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="mr-2"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
-        Crear primer evento
-      </button>
+  <!-- CTA Section -->
+  <section class="py-16 bg-gradient-to-br from-oled-dark to-oled-black border-t border-oled-neutral/30">
+    <div class="max-w-4xl mx-auto px-4 text-center">
+      <h2 class="text-3xl md:text-4xl font-display font-bold text-white mb-6">¿Listo para organizar tus streams?</h2>
+      <p class="text-text-secondary mb-8">Únete a cientos de creadores que ya organizan su contenido con Creator Calendar Pro.</p>
+      <a href="/calendar" class="btn-primary btn-lg flex items-center justify-center gap-3">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg>
+        <span>Empezar Gratis</span>
+      </a>
     </div>
-  </main>
-
-  <!-- Floating Action Button (Mobile) -->
-  <button class="fixed bottom-6 right-6 z-sticky btn-primary btn-lg shadow-xl hidden sm:block animate-slide-up" onclick="window.openEventModal?.(null, { quick: true })" aria-label="Crear nuevo evento">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="mr-2"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
-    <span>Nuevo evento</span>
-  </button>
-
-  <!-- Modals -->
-  <EventModal
-    id="event-modal"
-    isOpen={false}
-    onClose={() => window.closeEventModal?.()}
-    onSave={(data) => window.saveEventFromModal?.(data)}
-    onDelete={(id) => window.deleteEventFromModal?.(id)}
-  />
-
-  <ShareModal
-    id="share-modal"
-    isOpen={false}
-    shareUrl=""
-    qrCodeDataUrl=""
-    username={config.username}
-    onClose={() => window.closeShareModal?.()}
-    onCopyLink={() => window.copyShareLink?.()}
-    onDownloadICS={() => window.downloadShareICS?.()}
-    onExportImage={() => window.exportShareImage?.()}
-    onExportJSON={() => window.exportShareJSON?.()}
-  />
-</BaseLayout>
-
-<script type="module">
-  import '@/client/main.ts';
-</script>
-
-<style is:global>
-  .image-rendering-pixelated {
-    image-rendering: pixelated;
-    image-rendering: crisp-edges;
-  }
-</style>
+  </section>
+</Layout>

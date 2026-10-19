@@ -1,0 +1,50 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+
+---
+
+<BaseLayout
+  title="Términos de Servicio — Creator Calendar Pro"
+  description="Términos de servicio de Creator Calendar Pro"
+  canonicalURL="https://riutexu.github.io/creator-calendar-pro/terms"
+  noIndex={true}
+>
+  <header class="sticky top-0 z-sticky bg-oled-black/95 backdrop-blur-sm border-b border-oled-neutral px-4 py-3 flex items-center justify-between">
+    <a href="/" class="btn-ghost p-2 rounded-full" aria-label="Volver al inicio">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12" /><polyline points="12 19 5 12 12 5" /></svg>
+    </a>
+    <h1 class="font-display text-xl font-bold text-white flex-1 text-center">Términos de Servicio</h1>
+    <div class="w-10" />
+  </header>
+
+  <main class="p-4 max-w-2xl mx-auto space-y-6 pb-20" role="main">
+    <article class="prose prose-lg text-text-secondary max-w-none">
+      <h2 class="text-white font-bold text-xl mt-8 mb-4">1. Aceptación de Términos</h2>
+      <p>Al utilizar Creator Calendar Pro, aceptas estos términos de servicio. Si no estás de acuerdo, no utilices la aplicación.</p>
+
+      <h2 class="text-white font-bold text-xl mt-8 mb-4">2. Uso de la Aplicación</h2>
+      <p>Creator Calendar Pro se proporciona "tal cual" sin garantías de ningún tipo. El usuario es responsable de:
+      <ul class="list-disc pl-6 my-4">
+        <li>La exactitud de la información ingresada en el calendario.</li>
+        <li>La seguridad de su propia API Key de SteamGridDB.</li>
+        <li>Respeto a los derechos de autor y marcas registradas de los juegos mostrados.</li>
+      </ul></p>
+
+      <h2 class="text-white font-bold text-xl mt-8 mb-4">3. Limitación de Responsabilidad</h2>
+      <p>Creator Calendar Pro no se hace responsable por:
+      <ul class="list-disc pl-6 my-4">
+        <li>Pérdida de datos debido a fallos del navegador o eliminación del almacenamiento local.</li>
+        <li>Interrupciones del servicio de SteamGridDB.</li>
+        <li>Daños indirectos o consecuentes derivados del uso de la aplicación.</li>
+      </ul></p>
+
+      <h2 class="text-white font-bold text-xl mt-8 mb-4">4. Modificaciones</h2>
+      <p>Podemos actualizar estos términos en cualquier momento. Las actualizaciones entrarán en vigor inmediatamente tras su publicación en esta página.</p>
+
+      <h2 class="text-white font-bold text-xl mt-8 mb-4">5. Contacto</h2>
+      <p>Preguntas sobre estos términos: <a href="https://github.com/Riutexu/creator-calendar-pro/issues" class="text-oled-light hover:underline">GitHub Issues</a>.</p>
+
+      <p class="mt-8 text-xs text-text-muted border-t border-oled-neutral/30 pt-4">Última actualización: Octubre 2026</p>
+    </article>
+  </main>
+</BaseLayout>
