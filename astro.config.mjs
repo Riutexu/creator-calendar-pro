@@ -1,5 +1,6 @@
 import { defineConfig } from 'astro/config';
 import tailwind from '@astrojs/tailwind';
+import path from 'path';
 
 export default defineConfig({
   site: 'https://riutexu.github.io',
@@ -14,6 +15,11 @@ export default defineConfig({
     minify: true,
   },
   vite: {
+    resolve: {
+      alias: {
+        '@': path.resolve('./src'),
+      },
+    },
     build: {
       cssCodeSplit: true,
       rollupOptions: {

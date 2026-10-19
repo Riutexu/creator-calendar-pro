@@ -6,10 +6,11 @@ interface Props {
   ogImage?: string;
   ogType?: 'website' | 'article';
   noIndex?: boolean;
-  children: any;
 }
 
 const { title = 'Creator Calendar Pro', description, canonicalURL, ogImage, ogType = 'website', noIndex } = Astro.props;
+const site = Astro.site || 'https://riutexu.github.io';
+const base = '/creator-calendar-pro';
 ---
 <html lang="es">
   <head>
@@ -26,35 +27,35 @@ const { title = 'Creator Calendar Pro', description, canonicalURL, ogImage, ogTy
     <meta name="description" content={description || 'Calendario semanal OLED para creadores de contenido. Gratis, open source, sin tracking, offline-first.'} />
     <meta name="keywords" content="calendar, creator, streamer, oled, gaming, steamgriddb, pwa, offline-first" />
 
-    <link rel="canonical" href={canonicalURL || Astro.site} />
+    <link rel="canonical" href={canonicalURL || `${site}${base}`} />
     <meta property="og:type" content={ogType} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description || 'Calendario semanal OLED para creadores de contenido'} />
-    <meta property="og:url" content={canonicalURL || Astro.site} />
-    <meta property="og:image" content={ogImage || `${Astro.site}/og-image.png`} />
+    <meta property="og:url" content={canonicalURL || `${site}${base}`} />
+    <meta property="og:image" content={ogImage || `${site}${base}/og-image.png`} />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description || 'Calendario semanal OLED para creadores de contenido'} />
-    <meta name="twitter:image" content={ogImage || `${Astro.site}/og-image.png`} />
+    <meta name="twitter:image" content={ogImage || `${site}${base}/og-image.png`} />
 
     {noIndex && <meta name="robots" content="noindex, nofollow" />}
 
-    <link rel="manifest" href="/manifest.webmanifest" />
-    <link rel="apple-touch-icon" href="/icons/icon-192.png" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png" />
-    <link rel="icon" type="image/png" sizes="512x512" href="/icons/icon-512.png" />
+    <link rel="manifest" href={`${base}/manifest.webmanifest`} />
+    <link rel="apple-touch-icon" href={`${base}/icons/icon-192.png`} />
+    <link rel="icon" type="image/svg+xml" href={`${base}/favicon.svg`} />
+    <link rel="icon" type="image/png" sizes="192x192" href={`${base}/icons/icon-192.png`} />
+    <link rel="icon" type="image/png" sizes="512x512" href={`${base}/icons/icon-512.png`} />
 
     <script is:inline>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js').catch(() => {});
+          navigator.serviceWorker.register(`${base}/sw.js`).catch(() => {});
         });
       }
     </script>
   </head>
   <body class="min-h-screen bg-oled-black text-white font-sans antialiased">
-    <slot name="children" />
+    <slot />
   </body>
 </html>
 
