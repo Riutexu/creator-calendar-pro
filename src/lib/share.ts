@@ -1,40 +1,33 @@
 import QRCode from 'qrcode';
 import type { ShareData, CreatorConfig, CalendarEvent } from '@/types';
 import { saveShare } from './idb';
-import { generateId } from './idb';
 
 export async function generateShareLink(
   config: CreatorConfig,
   events: CalendarEvent[],
   username?: string
 ): Promise<{ hash: string; url: string; qrCodeDataUrl: string }> {
-  const hash = generateShareHash();
   const shareData: ShareData = {
     version: 1,
     config: sanitizeConfigForShare(config),
     events: sanitizeEventsForShare(events),
     exportedAt: new Date().toISOString(),
     exportedBy: username || 'anonymous',
-    hash,
+    hash: generateShareHash(),
   };
 
+  const hash = shareData.hash;
   shareData.config.username = username;
-
   await saveShare(shareData);
 
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
-  const url = `${baseUrl}/shared?hash=${hash}`;
-
+  const url = `${baseUrl}/creator-calendar-pro/shared?hash=${hash}`;
   const qrCodeDataUrl = await QRCode.toDataURL(url, {
     width: 256,
     margin: 2,
-    color: {
-      dark: '#3A7BC8',
-      light: '#00000000',
-    },
+    color: { dark: '#3A7BC8', light: '#00000000' },
     errorCorrectionLevel: 'M',
   });
-
   return { hash, url, qrCodeDataUrl };
 }
 
@@ -58,10 +51,7 @@ function sanitizeConfigForShare(config: CreatorConfig): CreatorConfig {
 }
 
 function sanitizeEventsForShare(events: CalendarEvent[]): CalendarEvent[] {
-  return events.map(event => ({
-    ...event,
-    notes: event.notes || undefined,
-  }));
+  return events.map(event => ({ ...event, notes: event.notes || undefined }));
 }
 
 export async function getShareData(hash: string): Promise<ShareData | null> {
@@ -74,35 +64,24 @@ export function parseShareHashFromUrl(): string | null {
   const urlParams = new URLSearchParams(window.location.search);
   const hashFromQuery = urlParams.get('hash');
   if (hashFromQuery) return hashFromQuery;
-
   const hashFromFragment = window.location.hash.slice(1);
   if (hashFromFragment) return hashFromFragment;
-
   return null;
-}
-
-export function isSharedView(): boolean {
-  return parseShareHashFromUrl() !== null;
 }
 
 export function getShareUrl(hash: string): string {
   if (typeof window === 'undefined') return '';
-  return `${window.location.origin}/shared?hash=${hash}`;
+  return `${window.location.origin}/creator-calendar-pro/shared?hash=${hash}`;
 }
 
 export function copyToClipboard(text: string): Promise<void> {
   return navigator.clipboard.writeText(text);
 }
 
-export async function downloadICS(
-  events: CalendarEvent[],
-  config: CreatorConfig,
-  username?: string
-): Promise<void> {
+export async function downloadICS(events: CalendarEvent[], config: CreatorConfig, username?: string): Promise<void> {
   const icsContent = generateICSContent(events, config, username);
   const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
   const url = URL.createObjectURL(blob);
-
   const a = document.createElement('a');
   a.href = url;
   a.download = `calendario-${username || 'creator'}.ics`;
@@ -112,11 +91,7 @@ export async function downloadICS(
   URL.revokeObjectURL(url);
 }
 
-function generateICSContent(
-  events: CalendarEvent[],
-  config: CreatorConfig,
-  username?: string
-): string {
+function generateICSContent(events: CalendarEvent[], config: CreatorConfig, username?: string): string {
   const lines = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
@@ -126,11 +101,9 @@ function generateICSContent(
     `X-WR-CALNAME:Calendario de ${username || 'Creador'}`,
     'X-WR-TIMEZONE:' + config.timezone,
   ];
-
   for (const event of events) {
     const start = new Date(event.start);
     const end = new Date(event.end);
-
     lines.push(
       'BEGIN:VEVENT',
       `UID:${event.id}@creator-calendar.pro`,
@@ -138,14 +111,11 @@ function generateICSContent(
       `DTSTART:${formatICSDate(start)}`,
       `DTEND:${formatICSDate(end)}`,
       `SUMMARY:${escapeICSText(event.title)}`,
-      `DESCRIPTION:${escapeICSText(
-        `${event.gameName} - ${event.type}\n${event.notes || ''}\n\nPlataformas: ${event.platforms.join(', ')}\n\nGenerado con Creator Calendar Pro`
-      )}`,
+      `DESCRIPTION:${escapeICSText(`${event.gameName} - ${event.type}\n${event.notes || ''}\n\nPlataformas: ${event.platforms.join(', ')}\n\nGenerado con Creator Calendar Pro`)}`,
       `LOCATION:${escapeICSText(event.platforms.join(', '))}`,
       'END:VEVENT'
     );
   }
-
   lines.push('END:VCALENDAR');
   return lines.join('\r\n');
 }
@@ -155,19 +125,10 @@ function formatICSDate(date: Date): string {
 }
 
 function escapeICSText(text: string): string {
-  return text
-    .replace(/\\/g, '\\\\')
-    .replace(/;/g, '\\;')
-    .replace(/,/g, '\\,')
-    .replace(/\n/g, '\\n')
-    .replace(/\r/g, '');
+  return text.replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\n/g, '\\n').replace(/\r/g, '');
 }
 
-export function exportToJSON(
-  config: CreatorConfig,
-  events: CalendarEvent[],
-  username?: string
-): void {
+export function exportToJSON(config: CreatorConfig, events: CalendarEvent[], username?: string): void {
   const data = {
     version: 1,
     exportedAt: new Date().toISOString(),
@@ -175,10 +136,8 @@ export function exportToJSON(
     config: sanitizeConfigForShare(config),
     events: sanitizeEventsForShare(events),
   };
-
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
-
   const a = document.createElement('a');
   a.href = url;
   a.download = `calendario-backup-${new Date().toISOString().split('T')[0]}.json`;
@@ -195,11 +154,11 @@ export async function importFromJSON(file: File): Promise<{ config: CreatorConfi
       try {
         const data = JSON.parse(e.target?.result as string);
         if (!data.config || !data.events) {
-          throw new Error('Formato de archivo inválido');
+          throw new Error('Formato de archivo invalido');
         }
         resolve({ config: data.config, events: data.events });
       } catch (err) {
-        reject(new Error('Error al leer el archivo JSON'));
+        reject(new Error('Error al leer el archivo'));
       }
     };
     reader.onerror = () => reject(new Error('Error al leer el archivo'));

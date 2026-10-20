@@ -1,10 +1,7 @@
 import html2canvas from 'html2canvas';
 import type { ExportImageOptions } from '@/types';
 
-export async function exportCalendarAsImage(
-  element: HTMLElement,
-  options: Partial<ExportImageOptions> = {}
-): Promise<Blob> {
+export async function exportCalendarAsImage(element: HTMLElement, options: Partial<ExportImageOptions> = {}): Promise<Blob> {
   const opts: ExportImageOptions = {
     format: 'png',
     quality: 1.0,
@@ -42,32 +39,13 @@ export async function exportCalendarAsImage(
 function addWatermark(doc: Document, text: string): void {
   const target = doc.querySelector('.calendar-grid') || doc.body;
   const watermark = doc.createElement('div');
-  watermark.style.cssText = `
-    position: absolute;
-    bottom: 20px;
-    right: 20px;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 14px;
-    color: rgba(58, 123, 200, 0.4);
-    pointer-events: none;
-    user-select: none;
-    z-index: 9999;
-    text-shadow: 0 0 8px rgba(0,0,0,0.8);
-  `;
+  watermark.style.cssText = `position: absolute; bottom: 20px; right: 20px; font-family: 'JetBrains Mono', monospace; font-size: 14px; color: rgba(58, 123, 200, 0.4); pointer-events: none; user-select: none; z-index: 9999; text-shadow: 0 0 8px rgba(0,0,0,0.8);`;
   watermark.textContent = text;
   target.appendChild(watermark);
 }
 
 function hideUIElements(doc: Document): void {
-  const selectors = [
-    '.header-actions',
-    '.settings-btn',
-    '.export-btn',
-    '.share-btn',
-    '.week-nav',
-    '[data-hide-on-export]',
-  ];
-
+  const selectors = ['.header-actions', '.settings-btn', '.export-btn', '.share-btn', '.week-nav', '[data-hide-on-export]'];
   selectors.forEach(selector => {
     doc.querySelectorAll(selector).forEach(el => {
       (el as HTMLElement).style.display = 'none';
@@ -102,14 +80,10 @@ function getWeekNumber(date: Date): number {
   return Math.ceil((((d.getTime() - yearStart.getTime()) / 86400000) + 1) / 7);
 }
 
-export async function exportAndDownload(
-  element: HTMLElement,
-  username?: string,
-  format: 'png' | 'jpeg' = 'png'
-): Promise<void> {
+export async function exportAndDownload(element: HTMLElement, username?: string, format: 'png' | 'jpeg' = 'png'): Promise<void> {
   try {
     const blob = await exportCalendarAsImage(element, { format });
-    const filename = generateExportFilename(username).replace('.png', `.${format}`);
+    const filename = generateExportFilename(username).replace(`.png`, `.${format}`);
     downloadBlob(blob, filename);
   } catch (error) {
     console.error('Error exporting image:', error);

@@ -3,53 +3,39 @@ interface Props {
   title?: string;
   description?: string;
   canonicalURL?: string;
-  ogImage?: string;
-  ogType?: 'website' | 'article';
   noIndex?: boolean;
 }
 
-const { title = 'Creator Calendar Pro', description, canonicalURL, ogImage, ogType = 'website', noIndex } = Astro.props;
-const site = Astro.site || 'https://riutexu.github.io';
-const base = '/creator-calendar-pro';
+const { title = 'Creator Calendar Pro', description, canonicalURL, noIndex } = Astro.props;
 ---
+
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#0A1628" />
     <meta name="color-scheme" content="dark" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'" />
-    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" /></noscript>
-
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" />
     <title>{title}</title>
-    <meta name="description" content={description || 'Calendario semanal OLED para creadores de contenido. Gratis, open source, sin tracking, offline-first.'} />
-    <meta name="keywords" content="calendar, creator, streamer, oled, gaming, steamgriddb, pwa, offline-first" />
-
-    <link rel="canonical" href={canonicalURL || `${site}${base}`} />
-    <meta property="og:type" content={ogType} />
+    <meta name="description" content={description || 'Calendario OLED para creadores de contenido'} />
+    <link rel="canonical" href={canonicalURL || 'https://riutexu.github.io/creator-calendar-pro/'} />
+    <meta property="og:type" content="website" />
     <meta property="og:title" content={title} />
-    <meta property="og:description" content={description || 'Calendario semanal OLED para creadores de contenido'} />
-    <meta property="og:url" content={canonicalURL || `${site}${base}`} />
-    <meta property="og:image" content={ogImage || `${site}${base}/og-image.png`} />
+    <meta property="og:description" content={description || 'Calendario OLED para creadores de contenido'} />
+    <meta property="og:url" content={canonicalURL || 'https://riutexu.github.io/creator-calendar-pro/'} />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
-    <meta name="twitter:description" content={description || 'Calendario semanal OLED para creadores de contenido'} />
-    <meta name="twitter:image" content={ogImage || `${site}${base}/og-image.png`} />
-
+    <meta name="twitter:description" content={description || 'Calendario OLED para creadores de contenido'} />
     {noIndex && <meta name="robots" content="noindex, nofollow" />}
-
-    <link rel="manifest" href={`${base}/manifest.webmanifest`} />
-    <link rel="apple-touch-icon" href={`${base}/icons/icon-192.png`} />
-    <link rel="icon" type="image/svg+xml" href={`${base}/favicon.svg`} />
-    <link rel="icon" type="image/png" sizes="192x192" href={`${base}/icons/icon-192.png`} />
-    <link rel="icon" type="image/png" sizes="512x512" href={`${base}/icons/icon-512.png`} />
-
+    <link rel="manifest" href="/creator-calendar-pro/manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="/creator-calendar-pro/icons/icon-192.png" />
+    <link rel="icon" type="image/svg+xml" href="/creator-calendar-pro/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/creator-calendar-pro/icons/icon-192.png" />
     <script is:inline>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register(`${base}/sw.js`).catch(() => {});
+          navigator.serviceWorker.register('/creator-calendar-pro/sw.js').catch(() => {});
         });
       }
     </script>
@@ -58,13 +44,3 @@ const base = '/creator-calendar-pro';
     <slot />
   </body>
 </html>
-
-<style is:global>
-  @media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after {
-      animation-duration: 0.01ms !important;
-      animation-iteration-count: 1 !important;
-      transition-duration: 0.01ms !important;
-    }
-  }
-</style>

@@ -1,186 +1,25 @@
 ---
-import BaseLayout from '@/layouts/BaseLayout.astro';
-import { DAY_NAMES_SHORT } from '@/types';
-import ExportImageButton from '@/components/Calendar/ExportImageButton.astro';
-import EventModal from '@/components/Modals/EventModal.astro';
-import ShareModal from '@/components/Modals/ShareModal.astro';
+import Layout from '@/layouts/BaseLayout.astro';
 
-const config = {
-  activeDays: [1,2,5,0],
-  streamingWindow: {start: '18:00', end: '02:00'},
-  timezone: 'Europe/Madrid',
-  username: '',
-};
-const today = new Date();
-const dayOrder = [1, 2, 3, 4, 5, 6, 0];
 ---
 
-<BaseLayout
-  title="Creator Calendar Pro — Tu calendario semanal"
-  description="Calendario semanal OLED para creadores de contenido. Organiza tus streams, videos y eventos con portadas oficiales de SteamGridDB."
-  canonicalURL="https://riutexu.github.io/creator-calendar-pro/"
->
-  <!-- Header -->
-  <header class="sticky top-0 z-sticky bg-oled-black/95 backdrop-blur-xl border-b border-oled-neutral/30 px-4 py-3" role="banner">
-    <div class="max-w-full mx-auto flex items-center justify-between gap-4 flex-wrap">
-      <!-- Brand -->
-      <div class="flex items-center gap-3 min-w-0">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-oled-light to-oled-accent flex items-center justify-center flex-shrink-0" aria-hidden="true">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.5">
-            <rect x="3" y="4" width="18" height="18" rx="3" ry="3" />
-            <line x1="16" y1="2" x2="16" y2="6" />
-            <line x1="8" y1="2" x2="8" y2="6" />
-            <line x1="3" y1="10" x2="21" y2="10" />
-          </svg>
-        </div>
-        <div class="min-w-0">
-          <h1 class="font-display text-xl font-bold text-white truncate">Creator Calendar Pro</h1>
-          <p class="text-xs text-text-muted font-mono" id="week-label">Cargando semana...</p>
-        </div>
-      </div>
-
-      <!-- Week Navigation -->
-      <nav class="flex items-center gap-2" aria-label="Navegación semanal" role="navigation">
-        <button id="prev-week" class="btn-ghost btn-icon" aria-label="Semana anterior" onclick="window.prevWeek?.()">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6" /></svg>
-        </button>
-        <button id="today-week" class="btn-secondary" aria-label="Esta semana" onclick="window.todayWeek?.()">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mr-1.5"><rect x="3" y="4" width="18" height="18" rx="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg>
-          <span class="hidden sm:inline">Hoy</span>
-        </button>
-        <button id="next-week" class="btn-ghost btn-icon" aria-label="Próxima semana" onclick="window.nextWeek?.()">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6" /></svg>
-        </button>
-      </nav>
-
-      <!-- Actions -->
-      <div class="flex items-center gap-2 ml-auto" role="group" aria-label="Acciones principales">
-        <ExportImageButton username={config.username} targetSelector=".calendar-main" />
-        
-        <!-- Share Button with Submenu -->
-        <div class="submenu-trigger relative">
-          <button id="share-btn" class="btn-secondary" aria-label="Compartir calendario" aria-haspopup="true" aria-expanded="false" onclick="window.toggleShareMenu?.(event)">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mr-1.5">
-              <circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" />
-              <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" /><line x1="15.41" y1="6.51" x2="8.58" y2="10.49" />
-            </svg>
-            <span class="hidden sm:inline">Compartir</span>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="ml-1"><polyline points="6 9 12 15 18 9" /></svg>
-          </button>
-          <div id="share-submenu" class="submenu hidden" role="menu" aria-label="Opciones de compartir">
-            <button class="submenu-item" role="menuitem" onclick="window.openShareModal?.(); window.closeShareMenu?.()">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" /><line x1="8.59" y1="13.51" x2="15.42" y2="17.49" /><line x1="15.41" y1="6.51" x2="8.58" y2="10.49" /></svg>
-              <span>Copiar link</span>
-            </button>
-            <button class="submenu-item" role="menuitem" onclick="window.exportShareImage?.(); window.closeShareMenu?.()">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><polyline points="21 15 16 10 5 21" /></svg>
-              <span>Exportar imagen</span>
-            </button>
-            <button class="submenu-item" role="menuitem" onclick="window.downloadShareICS?.(); window.closeShareMenu?.()">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /></svg>
-              <span>Descargar .ics</span>
-            </button>
-            <button class="submenu-item" role="menuitem" onclick="window.exportShareJSON?.(); window.closeShareMenu?.()">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /></svg>
-              <span>Exportar JSON</span>
-            </button>
-          </div>
-        </div>
-
-        <a href="/settings" class="btn-ghost btn-icon" aria-label="Configuración">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06-.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" /></svg>
-        </a>
-      </div>
-    </div>
+<Layout title="Calendario — Creator Calendar Pro">
+  <header class="sticky top-0 z-sticky bg-oled-black/95 backdrop-blur-sm border-b border-oled-neutral px-4 py-3 flex items-center justify-between" role="banner">
+    <a href="/" class="btn-ghost p-2 rounded-full" aria-label="Volver al calendario">
+      Back
+    </a>
+    <h1 class="font-display text-xl font-bold text-white flex-1 text-center">📅 Calendario Semanal</h1>
+    <div class="w-10" />
   </header>
 
-  <!-- Calendar Section -->
-  <main class="calendar-main max-w-full mx-auto px-4 pb-20" role="main">
-    <!-- Week Header with Live Info -->
-    <div class="mb-4 flex items-center justify-between gap-4 flex-wrap">
-      <div class="flex items-center gap-3">
-        <div class="w-2 h-2 rounded-full bg-oled-light/50 animate-pulse" aria-hidden="true"></div>
-        <div>
-          <p class="text-xs text-text-muted font-mono" id="week-label">Cargando semana...</p>
-          <p class="text-xs text-text-dim font-mono" id="week-range">—</p>
-        </div>
-      </div>
-      <div class="flex items-center gap-2 ml-auto flex-wrap">
-        <span class="text-xs text-text-dim font-mono hidden sm:block" id="timezone-display">Europe/Madrid</span>
-        <div class="w-px h-6 bg-oled-neutral/30 mx-2"></div>
-        <button class="btn-ghost btn-sm" onclick="window.openEventModal?.(null, { quick: true })" aria-label="Crear evento rápido">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
-          <span>Nuevo</span>
-        </button>
-      </div>
-    </div>
-
-    <!-- Calendar Grid -->
-    <div class="grid grid-cols-calendar gap-0 overflow-hidden rounded-2xl border border-oled-neutral/30 bg-gradient-to-br from-oled-dark/50 to-oled-black max-w-full shadow-xl" id="calendar-grid" role="grid" aria-label="Calendario semanal">
-      <!-- Time Column -->
-      <div class="flex-none min-w-[72px] max-w-[96px] sticky left-0 z-sticky bg-oled-black/95 backdrop-blur-xl border-r border-oled-neutral/30 px-2 py-2" id="time-column" role="columnheader">
-        <div class="flex flex-col" id="time-slots" aria-label="Horas"></div>
-      </div>
-
-      <!-- Day Columns -->
-      <div id="day-columns" role="rowgroup"></div>
-    </div>
-
-    <!-- Empty State (shown when no events) -->
-    <div id="empty-state" class="empty-state hidden" role="status" aria-live="polite">
-      <svg class="empty-state-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-        <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-        <line x1="16" y1="2" x2="16" y2="6" />
-        <line x1="8" y1="2" x2="8" y2="6" />
-        <line x1="3" y1="10" x2="21" y2="10" />
-        <line x1="8" y1="14" x2="16" y2="14" />
-        <line x1="8" y1="18" x2="16" y2="18" />
-      </svg>
-      <h3 class="empty-state-title">Semana libre</h3>
-      <p class="empty-state-description">No hay eventos programados. Haz clic en <kbd class="px-2 py-0.5 bg-oled-neutral/50 rounded text-xs font-mono">+</kbd> para crear tu primer stream.</p>
-      <button class="btn-primary" onclick="window.openEventModal?.(null, { quick: true })">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="mr-2"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
-        Crear primer evento
+  <main class="p-4 max-w-full mx-auto pb-20" role="main">
+    <div class="text-center py-20">
+      <h2 class="text-2xl font-bold text-white mb-4">Calendario Semanal</h2>
+      <p class="text-secondary">Organiza tus streams y eventos semanales</p>
+      <button class="btn-primary btn-lg mt-6">
+        <span class="text-xl">➕</span>
+        <span>Nuevo Evento</span>
       </button>
     </div>
   </main>
-
-  <!-- Floating Action Button (Mobile) -->
-  <button class="fixed bottom-6 right-6 z-sticky btn-primary btn-lg shadow-xl hidden sm:block animate-slide-up" onclick="window.openEventModal?.(null, { quick: true })" aria-label="Crear nuevo evento">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="mr-2"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
-    <span>Nuevo evento</span>
-  </button>
-
-  <!-- Modals -->
-  <EventModal
-    id="event-modal"
-    isOpen={false}
-    onClose={() => window.closeEventModal?.()}
-    onSave={(data) => window.saveEventFromModal?.(data)}
-    onDelete={(id) => window.deleteEventFromModal?.(id)}
-  />
-
-  <ShareModal
-    id="share-modal"
-    isOpen={false}
-    shareUrl=""
-    qrCodeDataUrl=""
-    username={config.username}
-    onClose={() => window.closeShareModal?.()}
-    onCopyLink={() => window.copyShareLink?.()}
-    onDownloadICS={() => window.downloadShareICS?.()}
-    onExportImage={() => window.exportShareImage?.()}
-    onExportJSON={() => window.exportShareJSON?.()}
-  />
-</BaseLayout>
-
-<script type="module">
-  import '@/client/main.ts';
-</script>
-
-<style is:global>
-  .image-rendering-pixelated {
-    image-rendering: pixelated;
-    image-rendering: crisp-edges;
-  }
-</style>
+</Layout>

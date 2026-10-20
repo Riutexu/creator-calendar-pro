@@ -33,11 +33,8 @@ export function createTouchDragHandler(options: TouchDragOptions = {}) {
   };
 
   function handleStart(event: TouchEvent | MouseEvent, target: HTMLElement): void {
-    const isTouch = 'touches' in event;
-    const touch = isTouch ? event.touches[0] : null;
-    const clientX = touch ? touch.clientX : (event as MouseEvent).clientX;
-    const clientY = touch ? touch.clientY : (event as MouseEvent).clientY;
-
+    const clientX = 'touches' in event ? event.touches[0].clientX : event.clientX;
+    const clientY = 'touches' in event ? event.touches[0].clientY : event.clientY;
     state = {
       isDragging: false,
       startX: clientX,
@@ -49,7 +46,6 @@ export function createTouchDragHandler(options: TouchDragOptions = {}) {
       target,
       startTime: Date.now(),
     };
-
     if (preventScroll) {
       event.preventDefault();
     }
@@ -57,24 +53,17 @@ export function createTouchDragHandler(options: TouchDragOptions = {}) {
 
   function handleMove(event: TouchEvent | MouseEvent): void {
     if (!state.target) return;
-
-    const isTouch = 'touches' in event;
-    const touch = isTouch ? event.touches[0] : null;
-    const clientX = touch ? touch.clientX : (event as MouseEvent).clientX;
-    const clientY = touch ? touch.clientY : (event as MouseEvent).clientY;
-
+    const clientX = 'touches' in event ? event.touches[0].clientX : event.clientX;
+    const clientY = 'touches' in event ? event.touches[0].clientY : event.clientY;
     state.currentX = clientX;
     state.currentY = clientY;
     state.deltaX = clientX - state.startX;
     state.deltaY = clientY - state.startY;
-
     const distance = Math.sqrt(state.deltaX ** 2 + state.deltaY ** 2);
-
     if (!state.isDragging && distance > threshold) {
       state.isDragging = true;
       onDragStart?.(state.target, event);
     }
-
     if (state.isDragging) {
       onDrag?.(state.target, state.deltaX, state.deltaY, event);
     }
@@ -100,16 +89,13 @@ export function createTouchDragHandler(options: TouchDragOptions = {}) {
   function attach(element: HTMLElement): () => void {
     element.addEventListener('mousedown', (e) => handleStart(e, element), { passive: !preventScroll });
     element.addEventListener('touchstart', (e) => handleStart(e, element), { passive: !preventScroll });
-
     const moveHandler = (e: TouchEvent | MouseEvent) => handleMove(e);
     const endHandler = (e: TouchEvent | MouseEvent) => handleEnd(e);
-
     document.addEventListener('mousemove', moveHandler, { passive: true });
     document.addEventListener('touchmove', moveHandler, { passive: true });
     document.addEventListener('mouseup', endHandler, { passive: true });
     document.addEventListener('touchend', endHandler, { passive: true });
     document.addEventListener('touchcancel', endHandler, { passive: true });
-
     return () => {
       document.removeEventListener('mousemove', moveHandler);
       document.removeEventListener('touchmove', moveHandler);
@@ -129,8 +115,7 @@ export function createHorizontalScrollDrag(element: HTMLElement) {
 
   const handleMouseDown = (e: MouseEvent | TouchEvent) => {
     isDown = true;
-    const isTouch = 'touches' in e;
-    const touch = isTouch ? e.touches[0] : null;
+    const touch = 'touches' in e ? e.touches[0] : null;
     startX = touch ? touch.pageX : (e as MouseEvent).pageX;
     scrollLeft = element.scrollLeft;
     element.style.cursor = 'grabbing';
@@ -140,8 +125,7 @@ export function createHorizontalScrollDrag(element: HTMLElement) {
   const handleMouseMove = (e: MouseEvent | TouchEvent) => {
     if (!isDown) return;
     e.preventDefault();
-    const isTouch = 'touches' in e;
-    const touch = isTouch ? e.touches[0] : null;
+    const touch = 'touches' in e ? e.touches[0] : null;
     const x = touch ? touch.pageX : (e as MouseEvent).pageX;
     const walk = (x - startX) * 1.5;
     element.scrollLeft = scrollLeft - walk;
@@ -155,13 +139,11 @@ export function createHorizontalScrollDrag(element: HTMLElement) {
 
   element.addEventListener('mousedown', handleMouseDown);
   element.addEventListener('touchstart', handleMouseDown, { passive: true });
-  document.addEventListener('mousemove', handleMouseMove);
+  document.addEventListener('mousemove', handleMouseMove, { passive: true });
   document.addEventListener('touchmove', handleMouseMove, { passive: true });
-  document.addEventListener('mouseup', handleMouseUp);
-  document.addEventListener('touchend', handleMouseUp);
-
+  document.addEventListener('mouseup', handleMouseUp, { passive: true });
+  document.addEventListener('touchend', handleMouseUp, { passive: true });
   element.style.cursor = 'grab';
-
   return () => {
     element.removeEventListener('mousedown', handleMouseDown);
     element.removeEventListener('touchstart', handleMouseDown);

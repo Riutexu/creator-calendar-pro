@@ -1,7 +1,6 @@
-import { format as formatDate, parseISO, startOfWeek, endOfWeek, addWeeks, subWeeks, startOfDay, endOfDay, isWithinInterval, setHours, setMinutes } from 'date-fns';
+import { format, parseISO, startOfWeek, endOfWeek, startOfDay, endOfDay, isWithinInterval, setHours, setMinutes } from 'date-fns';
 import { es } from 'date-fns/locale';
 import type { CalendarEvent, CreatorConfig, DayOfWeek } from '@/types';
-import { DEFAULT_CONFIG, DAY_NAMES_SHORT, DAY_NAMES_LONG } from '@/types';
 
 export function getWeekRange(date: Date = new Date(), config: CreatorConfig): { start: Date; end: Date } {
   const weekStart = startOfWeek(date, { weekStartsOn: 1 });
@@ -20,7 +19,7 @@ export function getWeekNumber(date: Date = new Date()): number {
 export function formatWeekLabel(date: Date = new Date(), config: CreatorConfig): string {
   const { start, end } = getWeekRange(date, config);
   const weekNum = getWeekNumber(date);
-  return `Semana ${weekNum} (${formatDate(start, 'd MMM', { locale: es })} - ${formatDate(end, 'd MMM', { locale: es })})`;
+  return `Semana ${weekNum} (${format(start, 'd MMM', { locale: es })} - ${format(end, 'd MMM', { locale: es }))}`;
 }
 
 export function generateTimeSlots(config: CreatorConfig): string[] {
@@ -28,15 +27,15 @@ export function generateTimeSlots(config: CreatorConfig): string[] {
   const [startH, startM] = config.streamingWindow.start.split(':').map(Number) as [number, number];
   const [endH, endM] = config.streamingWindow.end.split(':').map(Number) as [number, number];
 
-  let current = setMinutes(setHours(new Date(), startH), startM);
-  const endTime = setMinutes(setHours(new Date(), endH), endM);
+  let current = setMinutes(setHours(new Date(), startH), startH);
+  const endTime = setMinutes(setHours(new Date(), endH), endH);
 
   if (endTime <= current) {
     endTime.setDate(endTime.getDate() + 1);
   }
 
   while (current < endTime) {
-    slots.push(formatDate(current, 'HH:mm'));
+    slots.push(format(current, 'HH:mm'));
     current = addMinutes(current, 60);
   }
 
@@ -49,84 +48,58 @@ function addMinutes(date: Date, minutes: number): Date {
 
 export function getEventsForWeek(events: CalendarEvent[], weekStart: Date, weekEnd: Date, config: CreatorConfig): Map<string, CalendarEvent[]> {
   const eventsBySlot = new Map<string, CalendarEvent[]>();
-
   const weekStartDate = startOfDay(weekStart);
   const weekEndDate = endOfDay(weekEnd);
 
   for (const event of events) {
     const eventStart = parseISO(event.start);
     const eventEnd = parseISO(event.end);
-
     if (isWithinInterval(eventStart, { start: weekStartDate, end: weekEndDate }) ||
         isWithinInterval(eventEnd, { start: weekStartDate, end: weekEndDate }) ||
         (eventStart <= weekStartDate && eventEnd >= weekEndDate)) {
-      const dayKey = formatDate(eventStart, 'yyyy-MM-dd');
-      const timeKey = formatDate(eventStart, 'HH:mm');
+      const dayKey = format(eventStart, 'yyyy-MM-dd');
+      const timeKey = format(eventStart, 'HH:mm');
       const key = `${dayKey}-${timeKey}`;
-
       if (!eventsBySlot.has(key)) {
         eventsBySlot.set(key, []);
       }
       eventsBySlot.get(key)!.push(event);
     }
   }
-
   return eventsBySlot;
-}
-
-export function getEventsForDay(events: CalendarEvent[], date: Date): CalendarEvent[] {
-  const dayStart = startOfDay(date);
-  const dayEnd = endOfDay(date);
-
-  return events.filter(event => {
-    const eventStart = parseISO(event.start);
-    const eventEnd = parseISO(event.end);
-    return isWithinInterval(eventStart, { start: dayStart, end: dayEnd }) ||
-           isWithinInterval(eventEnd, { start: dayStart, end: dayEnd }) ||
-           (eventStart <= dayStart && eventEnd >= dayEnd);
-  }).sort((a, b) => parseISO(a.start).getTime() - parseISO(b.start).getTime());
 }
 
 export function getEventPosition(event: CalendarEvent, config: CreatorConfig): { top: number; height: number } {
   const [startH, startM] = config.streamingWindow.start.split(':').map(Number) as [number, number];
   const eventStart = parseISO(event.start);
   const eventEnd = parseISO(event.end);
-
   const windowStartMinutes = startH * 60 + startM;
   const eventStartMinutes = eventStart.getHours() * 60 + eventStart.getMinutes();
   const eventEndMinutes = eventEnd.getHours() * 60 + eventEnd.getMinutes();
-
   let top = eventStartMinutes - windowStartMinutes;
   let height = eventEndMinutes - eventStartMinutes;
-
   if (top < 0) {
     height += top;
     top = 0;
   }
-
-  const slotHeight = 60; // 1 hora = 60px base
+  const slotHeight = 60;
   return { top: top * (slotHeight / 60), height: height * (slotHeight / 60) };
 }
 
 export function formatEventTime(event: CalendarEvent, config: CreatorConfig): string {
   const start = parseISO(event.start);
   const end = parseISO(event.end);
-  return `${formatDate(start, 'HH:mm')} - ${formatDate(end, 'HH:mm')}`;
+  return `${format(start, 'HH:mm')} - ${format(end, 'HH:mm')}`;
 }
 
 export function getDayStatus(day: DayOfWeek, config: CreatorConfig): 'active' | 'inactive' {
   return config.activeDays.includes(day) ? 'active' : 'inactive';
 }
 
-export function getActiveDays(config: CreatorConfig): DayOfWeek[] {
-  return config.activeDays as DayOfWeek[];
-}
-
 export function toggleDay(day: DayOfWeek, config: CreatorConfig): CreatorConfig {
   const newActiveDays = config.activeDays.includes(day)
     ? config.activeDays.filter(d => d !== day)
     : [...config.activeDays, day].sort((a, b) => a - b);
-
   return { ...config, activeDays: newActiveDays };
 }
 
@@ -167,24 +140,10 @@ export function isTimeInWindow(timeStr: string, config: CreatorConfig): boolean 
   const timeMinutes = timeStringToMinutes(timeStr);
   const startMinutes = timeStringToMinutes(config.streamingWindow.start);
   let endMinutes = timeStringToMinutes(config.streamingWindow.end);
-
   if (endMinutes <= startMinutes) {
     endMinutes += 24 * 60;
   }
-
   return timeMinutes >= startMinutes && timeMinutes <= endMinutes;
-}
-
-export function getNextWeek(date: Date): Date {
-  return addWeeks(date, 1);
-}
-
-export function getPreviousWeek(date: Date): Date {
-  return subWeeks(date, 1);
-}
-
-export function getToday(): Date {
-  return startOfDay(new Date());
 }
 
 export function createEventFromForm(data: {
@@ -202,9 +161,8 @@ export function createEventFromForm(data: {
 }): CalendarEvent {
   const start = parseISO(`${data.date}T${data.startTime}`);
   const end = new Date(start.getTime() + data.durationMinutes * 60000);
-
   return {
-    id: generateId(),
+    id: `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 9)}`,
     gameId: data.gameId,
     gameName: data.gameName,
     gameCover: data.gameCover,
@@ -219,47 +177,4 @@ export function createEventFromForm(data: {
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };
-}
-
-export function generateId(): string {
-  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 9)}`;
-}
-
-export function getDefaultConfig(): CreatorConfig {
-  return {
-    ...DEFAULT_CONFIG,
-    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-  };
-}
-
-export function validateConfig(config: Partial<CreatorConfig>): { valid: boolean; errors: string[] } {
-  const errors: string[] = [];
-
-  if (config.activeDays !== undefined) {
-    if (!Array.isArray(config.activeDays) || config.activeDays.length === 0) {
-      errors.push('Debe haber al menos un día activo');
-    }
-    if (config.activeDays.some(d => d < 0 || d > 6)) {
-      errors.push('Días inválidos (deben ser 0-6)');
-    }
-  }
-
-  if (config.streamingWindow) {
-    const startMinutes = timeStringToMinutes(config.streamingWindow.start);
-    let endMinutes = timeStringToMinutes(config.streamingWindow.end);
-
-    if (endMinutes <= startMinutes) {
-      endMinutes += 24 * 60;
-    }
-
-    const durationHours = (endMinutes - startMinutes) / 60;
-    if (durationHours < 2) {
-      errors.push('La ventana de streaming debe ser de al menos 2 horas');
-    }
-    if (durationHours > 24) {
-      errors.push('La ventana de streaming no puede exceder 24 horas');
-    }
-  }
-
-  return { valid: errors.length === 0, errors };
 }
