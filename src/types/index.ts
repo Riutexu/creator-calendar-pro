@@ -11,6 +11,15 @@ export interface CreatorConfig {
   id?: string;
 }
 
+export interface ExportImageOptions {
+  format: 'png' | 'jpeg';
+  quality: number;
+  width: number;
+  height: number;
+  includeWatermark: boolean;
+  watermarkText: string;
+}
+
 export interface CalendarEvent {
   id: string;
   gameId: string;

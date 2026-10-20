@@ -33,8 +33,17 @@ export function createTouchDragHandler(options: TouchDragOptions = {}) {
   };
 
   function handleStart(event: TouchEvent | MouseEvent, target: HTMLElement): void {
-    const clientX = 'touches' in event ? event.touches[0].clientX : event.clientX;
-    const clientY = 'touches' in event ? event.touches[0].clientY : event.clientY;
+    let clientX: number;
+    let clientY: number;
+    if ('touches' in event) {
+      const touch = event.touches[0];
+      if (!touch) return;
+      clientX = touch.clientX;
+      clientY = touch.clientY;
+    } else {
+      clientX = (event as MouseEvent).clientX;
+      clientY = (event as MouseEvent).clientY;
+    }
     state = {
       isDragging: false,
       startX: clientX,
@@ -53,8 +62,17 @@ export function createTouchDragHandler(options: TouchDragOptions = {}) {
 
   function handleMove(event: TouchEvent | MouseEvent): void {
     if (!state.target) return;
-    const clientX = 'touches' in event ? event.touches[0].clientX : event.clientX;
-    const clientY = 'touches' in event ? event.touches[0].clientY : event.clientY;
+    let clientX: number;
+    let clientY: number;
+    if ('touches' in event) {
+      const touch = event.touches[0];
+      if (!touch) return;
+      clientX = touch.clientX;
+      clientY = touch.clientY;
+    } else {
+      clientX = (event as MouseEvent).clientX;
+      clientY = (event as MouseEvent).clientY;
+    }
     state.currentX = clientX;
     state.currentY = clientY;
     state.deltaX = clientX - state.startX;
