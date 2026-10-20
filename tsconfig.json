@@ -6,7 +6,8 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"]
-    }
+    },
+    "types": ["astro/client", "vite/client"]
   },
   "include": ["src/**/*", "astro.config.mjs", "tailwind.config.mjs"],
   "exclude": ["node_modules", "dist", ".astro"]

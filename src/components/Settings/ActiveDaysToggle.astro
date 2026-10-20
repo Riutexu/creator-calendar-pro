@@ -1,0 +1,10 @@
+---
+interface Props {
+  activeDays: number[];
+  onToggleDay: (day: number) => void;
+  class?: string;
+}
+const { activeDays = [], onToggleDay, class: className = '' } = Astro.props;
+
+const dayOrder = [1, 2, 3, 4, 5, 6, 0];
+const dayLabels = ['LUN', 'MAR', 'MIÉ', 'JUE', 'VIE', 'SÁB', 'DOM'];

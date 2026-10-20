@@ -1,0 +1,20 @@
+---
+interface Props {
+  event: any;
+  isSharedView?: boolean;
+}
+const { event, isSharedView = false } = Astro.props;
+
+const typeBadges: Record<string, string> = {
+  stream: 'badge-stream',
+  video: 'badge-video',
+  event: 'badge-event',
+  collab: 'badge-collab',
+};
+
+const typeLabels: Record<string, string> = {
+  stream: 'Stream',
+  video: 'Video',
+  event: 'Evento',
+  collab: 'Colab',
+};

@@ -11,15 +11,6 @@ export interface CreatorConfig {
   id?: string;
 }
 
-export interface ExportImageOptions {
-  format: 'png' | 'jpeg';
-  quality: number;
-  width: number;
-  height: number;
-  includeWatermark: boolean;
-  watermarkText: string;
-}
-
 export interface CalendarEvent {
   id: string;
   gameId: string;
@@ -71,20 +62,31 @@ export interface Toast {
   duration?: number;
 }
 
-export const DAY_NAMES_SHORT: Record<DayOfWeek, string> = {
+export const DAY_NAMES_SHORT: Record<number, string> = {
   0: 'DOM', 1: 'LUN', 2: 'MAR', 3: 'MIÉ', 4: 'JUE', 5: 'SÁB', 6: 'VIE',
 };
-export const DAY_NAMES_LONG: Record<DayOfWeek, string> = {
+export const DAY_NAMES_LONG: Record<number, string> = {
   0: 'Domingo', 1: 'Lunes', 2: 'Martes', 3: 'Miércoles', 4: 'Jueves', 5: 'Sábado', 6: 'Viernes',
 };
 export const EVENT_TYPE_LABELS: Record<EventType, string> = {
-  stream: 'Stream', video: 'Video', event: 'Evento', collab: 'Colab',
+  stream: 'Stream',
+  video: 'Video',
+  event: 'Evento',
+  collab: 'Colab',
 };
 export const EVENT_TYPE_BADGES: Record<EventType, string> = {
-  stream: 'badge-stream', video: 'badge-video', event: 'badge-event', collab: 'badge-collab',
+  stream: 'badge-stream',
+  video: 'badge-video',
+  event: 'badge-event',
+  collab: 'badge-collab',
 };
 export const PLATFORM_ICONS: Record<Platform, string> = {
-  twitch: 'twitch', youtube: 'youtube', kick: 'kick', tiktok: 'tiktok', trovo: 'trovo', discord: 'discord',
+  twitch: 'twitch',
+  youtube: 'youtube',
+  kick: 'kick',
+  tiktok: 'tiktok',
+  trovo: 'trovo',
+  discord: 'discord',
 };
 export const DEFAULT_CONFIG: CreatorConfig = {
   activeDays: [1, 2, 5, 0],

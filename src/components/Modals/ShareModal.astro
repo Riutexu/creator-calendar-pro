@@ -1,0 +1,14 @@
+---
+interface Props {
+  isOpen: boolean;
+  shareUrl: string;
+  qrCodeDataUrl: string;
+  username?: string;
+  onClose: () => void;
+  onCopyLink: () => void;
+  onDownloadICS: () => void;
+  onExportImage: () => void;
+  onExportJSON: () => void;
+  class?: string;
+}
+const { isOpen = false, shareUrl = '', qrCodeDataUrl = '', username, onClose, onCopyLink, onDownloadICS, onExportImage, onExportJSON, class: className = '' } = Astro.props;

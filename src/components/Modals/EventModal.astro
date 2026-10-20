@@ -1,0 +1,15 @@
+---
+interface Props {
+  isOpen: boolean;
+  event?: any;
+  games?: any[];
+  onClose: () => void;
+  onSave: (data: any) => void;
+  onDelete?: (id: string) => void;
+  isSharedView?: boolean;
+  class?: string;
+}
+const { isOpen = false, event, games = [], onClose, onSave, onDelete, isSharedView = false, class: className = '' } = Astro.props;
+
+const isEditing = !!event;
+const today = new Date().toISOString().split('T')[0];

@@ -1,0 +1,13 @@
+---
+interface Props {
+  type?: 'text' | 'password' | 'email' | 'number' | 'time' | 'date' | 'search' | 'time';
+  label?: string;
+  placeholder?: string;
+  value?: string;
+  name?: string;
+  id?: string;
+  required?: boolean;
+  disabled?: boolean;
+  class?: string;
+}
+const { type = 'text', label, placeholder, value = '', name, id, required = false, disabled = false, class: className = '' } = Astro.props;

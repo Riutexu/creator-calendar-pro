@@ -83,7 +83,7 @@ function getWeekNumber(date: Date): number {
 export async function exportAndDownload(element: HTMLElement, username?: string, format: 'png' | 'jpeg' = 'png'): Promise<void> {
   try {
     const blob = await exportCalendarAsImage(element, { format });
-    const filename = generateExportFilename(username).replace(`.png`, `.${format}`);
+    const filename = generateExportFilename(username).replace('.png', `.${format}`);
     downloadBlob(blob, filename);
   } catch (error) {
     console.error('Error exporting image:', error);

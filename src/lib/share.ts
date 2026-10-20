@@ -16,7 +16,7 @@ export async function generateShareLink(
     hash: generateShareHash(),
   };
   const hash = shareData.hash;
-  shareData.config.username = username || '';
+  shareData.config.username = username;
   await saveShare(shareData);
 
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
@@ -152,7 +152,7 @@ export async function importFromJSON(file: File): Promise<{ config: CreatorConfi
       try {
         const data = JSON.parse(e.target?.result as string);
         if (!data.config || !data.events) {
-          throw new Error('Formato de archivo invalido');
+          throw new Error('Formato de archivo inválido');
         }
         resolve({ config: data.config, events: data.events });
       } catch (err) {

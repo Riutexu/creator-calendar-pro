@@ -1,0 +1,9 @@
+---
+interface Props {
+  apiKey?: string;
+  onSave: (key: string) => void;
+  onTest: () => void;
+  isTesting?: boolean;
+  class?: string;
+}
+const { apiKey = '', onSave, onTest, isTesting = false, class: className = '' } = Astro.props;

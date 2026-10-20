@@ -1,0 +1,68 @@
+---
+interface Props {
+  day: number;
+  dayName: string;
+  isActive: boolean;
+  timeSlots: string[];
+  events: Map<string, any[]>;
+  date: Date;
+  isSharedView?: boolean;
+  onCreateEvent?: (day: number, time: string) => void;
+  class?: string;
+}
+const { day, dayName, isActive, timeSlots, events, date, isSharedView = false, onCreateEvent, class: className = '' } = Astro.props;
+
+const dateStr = date.toISOString().split('T')[0];
+const dayNamesShort: Record<number, string> = { 0: 'DOM', 1: 'LUN', 2: 'MAR', 3: 'MIÉ', 4: 'JUE', 5: 'SÁB', 6: 'VIE' };
+
+const daySlots = timeSlots.map(slot => `${dateStr}-${slot}`);
+
+let slotsHtml = timeSlots.map((slot, si) => {
+  const key = `${dateStr}-${slot}`;
+  const dayEvents = events.get(key) || [];
+  const isLast = si === timeSlots.length - 1;
+
+  const eventsHtml = dayEvents.map((event: any, ei: number) => `
+    <div class="pill-event relative z-10 mx-1 my-0.5 animate-scale-in" data-event-id="${event.id}" style="border-left-color: ${event.color};" tabindex="0" role="listitem" aria-label="${event.title} - ${event.gameName}" data-date="${dateStr}" data-time="${slot}">
+      ${event.gameCover ? `<img src="${event.gameCover}" alt="" class="w-4 h-6 object-cover rounded-sm flex-shrink-0" loading="lazy" onerror="this.style.display='none'" />` : ''}
+      <span class="truncate max-w-[140px] font-mono text-pill font-medium text-white">${event.title}</span>
+      <span class="badge ${typeBadges[event.type]} ml-1 flex-shrink-0">${event.type}</span>
+      <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-oled-elevated border border-oled-neutral/50 rounded-lg text-xs font-mono text-text-secondary whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-fast z-tooltip pointer-events-none">
+        <div class="font-medium text-white">${event.gameName}</div>
+        <div>${event.title}</div>
+        <div class="text-text-muted">${event.platforms.join(', ')}</div>
+        ${event.notes ? `<div class="truncate max-w-[200px]">${event.notes}</div>` : ''}
+      </div>
+    </div>
+  `).join('');
+
+  const addButton = isActive && !isSharedView ? `
+    <button type="button" class="absolute inset-0 w-full h-full flex items-center justify-center text-text-muted/30 hover:text-oled-light/50 hover:bg-oled-neutral/20 transition-all duration-fast rounded-lg mx-1 my-0.5" data-create-day="${day}" data-create-time="${slot}" aria-label="Crear evento en ${dayName} a las ${slot}" tabindex="0">
+      <span class="text-xs font-mono">+</span>
+    </button>
+  ` : '';
+
+  return `
+    <div class="relative min-h-[60px] border-b border-oled-neutral/30" data-time="${slot}" data-slot-key="${key}">
+      ${eventsHtml}
+      ${addButton}
+      ${!isLast ? '<div class="absolute bottom-0 left-2 right-2 border-t border-oled-neutral/20" aria-hidden="true" />' : ''}
+    </div>
+  `;
+  }).join('');
+
+  return `
+    <div class="flex-1 min-w-0 relative ${isActive ? 'ring-1 ring-oled-light/30' : ''}" data-day="${day}" data-date="${dateStr}" data-active="${isActive}" role="gridcell" aria-label="${dayName}">
+      <div class="sticky top-0 z-10 px-2 py-2 text-center font-mono text-pill font-medium border-b border-oled-neutral ${isActive ? 'bg-oled-dark text-white' : 'bg-oled-inactive text-text-muted'}">
+        <span class="flex items-center justify-center gap-1.5">
+          ${dayName}
+          <span class="text-xs font-sans ${isToday ? 'text-oled-light font-semibold' : ''}">${dayDate.getDate()}${isToday ? ' · Hoy' : ''}</span>
+          ${!isActive ? '<span class="badge badge-warning ml-1">INACTIVO</span>' : ''}
+        </span>
+      </div>
+      <div class="flex flex-col min-h-[calc(100vh-120px)]" role="list" aria-label="Eventos de ${dayName}">
+        ${slotsHtml}
+      </div>
+    </div>
+  `;
+  }).join('');

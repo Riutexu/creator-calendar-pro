@@ -1,0 +1,7 @@
+---
+interface Props {
+  class?: string;
+  elevate?: boolean;
+  children: any;
+}
+const { class: className = '', elevate = false, children } = Astro.props;
