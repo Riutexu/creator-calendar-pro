@@ -9,6 +9,7 @@ export interface CreatorConfig {
   username: string;
   steamGridDbKey?: string;
   id?: string;
+  theme?: string;
 }
 
 export interface CalendarEvent {
@@ -26,6 +27,15 @@ export interface CalendarEvent {
   color: string;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface ExportImageOptions {
+  format: 'png' | 'jpeg';
+  quality: number;
+  width: number;
+  height: number;
+  includeWatermark: boolean;
+  watermarkText: string;
 }
 
 export interface SteamGridDBGame {
